@@ -54,9 +54,14 @@ Expected response:
 
 Check runs are being logged (requires your API key from Settings):
 
+**Mac / Linux:**
 ```bash
-curl http://localhost:8088/api/runs \
-  -H "Authorization: Bearer <your-torrix-api-key>"
+curl http://localhost:8088/api/runs -H "Authorization: Bearer <your-torrix-api-key>"
+```
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest http://localhost:8088/api/runs -Headers @{Authorization="Bearer <your-torrix-api-key>"} | Select-Object -ExpandProperty Content
 ```
 
 Returns a list of all logged runs. An empty array `[]` means the server is working but no runs have been sent yet.
@@ -70,13 +75,7 @@ Returns a list of all logged runs. An empty array `[]` means the server is worki
 Route your existing LLM calls through the Torrix proxy with no code changes to your app logic.
 
 ```bash
-curl -X POST http://localhost:8088/proxy \
-  -H "Authorization: Bearer <your-torrix-api-key>" \
-  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
-  -H "x-upstream-authorization: Bearer <your-openai-key>" \
-  -H "x-torrix-name: my-run" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
+curl -X POST http://localhost:8088/proxy -H "Authorization: Bearer <your-torrix-api-key>" -H "x-target-url: https://api.openai.com/v1/chat/completions" -H "x-upstream-authorization: Bearer <your-openai-key>" -H "x-torrix-name: my-run" -H "Content-Type: application/json" -d "{\"model\":\"gpt-4o-mini\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
 ```
 
 | Header | Description |

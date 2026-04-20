@@ -39,6 +39,28 @@ Or download the file manually:
 3. Copy your API key from Settings
 4. Start sending LLM calls through the proxy or SDK
 
+### Verify your setup
+
+Check the server is running (no API key needed):
+
+```bash
+curl http://localhost:8088/health
+```
+
+Expected response:
+```json
+{"ok":true,"name":"Torrix","version":"0.1.0"}
+```
+
+Check runs are being logged (requires your API key from Settings):
+
+```bash
+curl http://localhost:8088/api/runs \
+  -H "Authorization: Bearer <your-torrix-api-key>"
+```
+
+Returns a list of all logged runs. An empty array `[]` means the server is working but no runs have been sent yet.
+
 ---
 
 ## Sending data to Torrix

@@ -66,6 +66,36 @@ Invoke-WebRequest http://localhost:8088/api/runs -Headers @{Authorization="Beare
 
 Returns a list of all logged runs. An empty array `[]` means the server is working but no runs have been sent yet.
 
+### Send a test run
+
+Send a real request through the Torrix proxy to confirm runs appear in the dashboard. Even if the OpenAI key is invalid, Torrix will still log the attempt.
+
+**Mac / Linux:**
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-name: test-run" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Method Post http://localhost:8088/proxy `
+  -Headers @{
+    "Authorization"="Bearer <your-torrix-api-key>";
+    "x-target-url"="https://api.openai.com/v1/chat/completions";
+    "x-upstream-authorization"="Bearer <your-openai-key>";
+    "x-torrix-name"="test-run"
+  } `
+  -ContentType "application/json" `
+  -Body '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}' | Select-Object -ExpandProperty Content
+```
+
+Then open [http://localhost:8088](http://localhost:8088) — the run should appear in your dashboard.
+
 ---
 
 ## Sending data to Torrix

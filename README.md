@@ -1,6 +1,6 @@
-# Torrix - AI Observability
+# Torrix: AI Observability
 
-Track every LLM request: tokens, cost, latency, and full prompt traces. Works with OpenAI, Anthropic, and more. Self-hosted, no data leaves your machine.
+Track every LLM request: tokens, cost, latency, and full prompt traces. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, and any HTTP endpoint. Self-hosted, no data leaves your machine.
 
 ---
 
@@ -94,39 +94,24 @@ Invoke-WebRequest -Method Post http://localhost:8088/proxy `
   -Body '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}' | Select-Object -ExpandProperty Content
 ```
 
-Then open [http://localhost:8088](http://localhost:8088) — the run should appear in your dashboard.
+Then open [http://localhost:8088](http://localhost:8088). The run should appear in your dashboard.
 
 ---
 
 ## Sending data to Torrix
 
-### Option 1 - HTTP Proxy (any language)
-
-Route your existing LLM calls through the Torrix proxy with no code changes to your app logic.
-
-```bash
-curl -X POST http://localhost:8088/proxy -H "Authorization: Bearer <your-torrix-api-key>" -H "x-target-url: https://api.openai.com/v1/chat/completions" -H "x-upstream-authorization: Bearer <your-openai-key>" -H "x-torrix-name: my-run" -H "Content-Type: application/json" -d "{\"model\":\"gpt-4o-mini\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
-```
-
-| Header | Description |
-|---|---|
-| `Authorization` | Your Torrix API key (from Settings) |
-| `x-target-url` | The real LLM endpoint to forward to |
-| `x-upstream-authorization` | Your LLM provider API key |
-| `x-torrix-name` | Optional label for this run |
-
-### Option 2 - Python SDK
+### Option 1: Python SDK
 
 ```bash
 pip install torrix
 ```
 
+**OpenAI:**
 ```python
 import torrix
 from openai import OpenAI
 
 torrix.init(api_key="<your-torrix-api-key>", base_url="http://localhost:8088")
-
 client = torrix.wrap(OpenAI(api_key="<your-openai-key>"))
 
 response = client.chat.completions.create(
@@ -137,24 +122,153 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-Works with Anthropic too:
-
+**Anthropic:**
 ```python
 from anthropic import Anthropic
 
 client = torrix.wrap(Anthropic(api_key="<your-anthropic-key>"))
 
 response = client.messages.create(
-    model="claude-3-haiku-20240307",
-    max_tokens=64,
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
     torrix_name="my-run",
 )
+print(response.content[0].text)
 ```
 
-### Option 3 - n8n Workflow
+**Streaming:**
+```python
+stream = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+    stream=True,
+)
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="", flush=True)
+```
 
-Use the HTTP Request node pointed at `http://host.docker.internal:8088/proxy` with these headers:
+### Option 2: Node.js SDK
+
+```bash
+npm install torrix openai
+# or: npm install torrix @anthropic-ai/sdk
+```
+
+**OpenAI:**
+```typescript
+import * as torrix from 'torrix'
+import OpenAI from 'openai'
+
+torrix.init('<your-torrix-api-key>', 'http://localhost:8088')
+const client = torrix.wrap(new OpenAI({ apiKey: '<your-openai-key>' }))
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  torrix_name: 'my-run',
+})
+console.log(response.choices[0].message.content)
+```
+
+**Anthropic:**
+```typescript
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = torrix.wrap(new Anthropic({ apiKey: '<your-anthropic-key>' }))
+
+const response = await client.messages.create({
+  model: 'claude-3-5-sonnet-20241022',
+  max_tokens: 1024,
+  messages: [{ role: 'user', content: 'Hello!' }],
+  torrix_name: 'my-run',
+})
+console.log(response.content[0].text)
+```
+
+### Option 3: HTTP Proxy (any language or tool)
+
+Route any HTTP request through Torrix. Works with Google Gemini, Azure OpenAI, Groq, Mistral, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
+
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-name: my-run" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+| Header | Description |
+|---|---|
+| `Authorization` | Your Torrix API key (from Settings) |
+| `x-target-url` | The real LLM endpoint to forward to |
+| `x-upstream-authorization` | Your LLM provider API key (omit if using `?key=` in URL) |
+| `x-torrix-name` | Optional label for this run |
+| `x-torrix-provider` | Optional provider hint: `openai`, `anthropic`, `google` |
+
+**Google Gemini** (uses `?key=` instead of Bearer token):
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8088/proxy",
+    headers={
+        "Authorization": "Bearer <your-torrix-api-key>",
+        "x-target-url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=<your-gemini-key>",
+        "x-torrix-provider": "google",
+        "x-torrix-name": "gemini-test",
+    },
+    json={"contents": [{"parts": [{"text": "Hello!"}]}]},
+)
+```
+
+**Azure OpenAI:**
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://<your-resource>.openai.azure.com/openai/deployments/<your-deployment>/chat/completions?api-version=2024-02-01" \
+  -H "x-upstream-authorization: Bearer <your-azure-key>" \
+  -H "x-torrix-name: azure-test" \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Hello"}]}'
+```
+
+**Groq:**
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.groq.com/openai/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-groq-key>" \
+  -H "x-torrix-name: groq-test" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"llama3-8b-8192","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+**Mistral:**
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.mistral.ai/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-mistral-key>" \
+  -H "x-torrix-name: mistral-test" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"mistral-small-latest","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+**DeepSeek:**
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.deepseek.com/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-deepseek-key>" \
+  -H "x-torrix-name: deepseek-test" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
+**n8n workflow:** Use the HTTP Request node pointed at `http://host.docker.internal:8088/proxy` with these headers:
 
 | Header | Value |
 |---|---|
@@ -165,17 +279,62 @@ Use the HTTP Request node pointed at `http://host.docker.internal:8088/proxy` wi
 
 ---
 
+## Features
+
+### Real-time cost tracking
+Every API call is logged with token counts, model, cost, and latency. See exactly what you're spending as it happens.
+
+### Regression testing (Evals)
+Mark any run as a golden baseline. Replay it against the LLM with one click and compare outputs side-by-side. Catch regressions when switching models or changing prompts.
+
+### Model cost comparison
+On any run detail page, see what the same request would have cost on every other supported model, sorted cheapest to most expensive.
+
+### Budget alerts
+Set a daily spend threshold. Torrix fires a webhook (Slack, Discord, or any POST endpoint) when you exceed it. Fires once per day, no noise.
+
+### Run comparison
+Pick any two runs and compare them side-by-side: model, cost, tokens, latency, prompt, and response.
+
+---
+
 ## Community Edition
 
-| Feature | Community | Cloud |
+Community edition is free forever. Data is retained for 7 days and older runs are automatically deleted.
+
+| Feature | Community | Pro / Cloud |
 |---|---|---|
 | Users | 1 | Coming Soon |
 | Data retention | 7 days | Coming Soon |
-| Runs shown | 100 | Coming Soon |
-| CSV export | No | Coming Soon |
+| Golden runs retention | 14 days | Coming Soon |
+| Runs shown | 100 most recent | Coming Soon |
+| Budget alerts | ✓ | ✓ |
+| Evals & regression testing | ✓ | ✓ |
+| Model cost comparison | ✓ | ✓ |
 | Support | Community | Coming Soon |
 
 Torrix Cloud is coming soon at [torrix.ai](https://torrix.ai)
+
+---
+
+## Updating Torrix
+
+To pull the latest version:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+---
+
+## Stopping Torrix
+
+```bash
+docker compose down
+```
+
+Your data is preserved in the `./data/` folder and will be available when you start again.
 
 ---
 
@@ -183,8 +342,23 @@ Torrix Cloud is coming soon at [torrix.ai](https://torrix.ai)
 
 | Environment variable | Default | Description |
 |---|---|---|
-| `DB_PATH` | `torrix.sqlite` | Path to SQLite database |
+| `DB_PATH` | `/data/torrix.sqlite` | Path to SQLite database inside the container |
 | `TORRIX_TELEMETRY` | `true` | Set to `false` to opt out of anonymous usage stats |
+
+To set environment variables, add an `environment` block to your `docker-compose.yml`:
+
+```yaml
+services:
+  torrix:
+    image: adarshr23/torrix:latest
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./data:/data
+    environment:
+      - TORRIX_TELEMETRY=false
+    restart: unless-stopped
+```
 
 ---
 
@@ -192,4 +366,4 @@ Torrix Cloud is coming soon at [torrix.ai](https://torrix.ai)
 
 All data stays on your machine. The SQLite database is stored in `./data/` on your host. Torrix never sends your prompts, responses, or API keys anywhere.
 
-To opt out of anonymous telemetry (instance ID, OS, Node version), set `TORRIX_TELEMETRY=false` in your `docker-compose.yml`.
+Anonymous telemetry is enabled by default. It sends only your instance ID, OS, and Node version to help improve Torrix. To opt out, set `TORRIX_TELEMETRY=false` in your `docker-compose.yml` as shown above.

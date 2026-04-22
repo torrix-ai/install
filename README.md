@@ -207,6 +207,7 @@ curl -X POST http://localhost:8088/proxy \
 | `x-upstream-authorization` | Your LLM provider API key (omit if using `?key=` in URL) |
 | `x-torrix-name` | Optional label for this run |
 | `x-torrix-provider` | Optional provider hint: `openai`, `anthropic`, `google` |
+| `x-torrix-trace` | Optional trace ID to group multiple calls into one agent run |
 
 **Google Gemini** (uses `?key=` instead of Bearer token):
 ```python
@@ -280,6 +281,36 @@ curl -X POST http://localhost:8088/proxy \
 ---
 
 ## Features
+
+### Agent trace grouping
+
+Add `x-torrix-trace` to every call in an agent run to group them into a single chain timeline. Generate one UUID per agent invocation and reuse it across all steps:
+
+```bash
+TRACE_ID=$(python3 -c "import uuid; print(uuid.uuid4())")
+
+# Step 1
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-trace: $TRACE_ID" \
+  -H "x-torrix-name: classify" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Classify this ticket..."}]}'
+
+# Step 2 - same TRACE_ID links it to step 1
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-trace: $TRACE_ID" \
+  -H "x-torrix-name: respond" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o","messages":[{"role":"user","content":"Now write a reply..."}]}'
+```
+
+Both runs appear in the Runs list with a **trace** badge. Click it to open the chain timeline showing each step with its model, tokens, cost, and latency.
 
 ### Real-time cost tracking
 Every API call is logged with token counts, model, cost, and latency. See exactly what you're spending as it happens.

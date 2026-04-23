@@ -1,6 +1,6 @@
 # Torrix: AI Observability
 
-Track every LLM request: tokens, cost, latency, full prompt traces, and reasoning token capture. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
+Track every LLM request: tokens, cost, latency, full prompt traces, and reasoning token capture. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
 
 ---
 
@@ -192,7 +192,7 @@ console.log(response.content[0].text)
 
 ### Option 3: HTTP Proxy (any language or tool)
 
-Route any HTTP request through Torrix. Works with Google Gemini, Azure OpenAI, Groq, Mistral, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
+Route any HTTP request through Torrix. Works with Google Gemini, Azure OpenAI, Groq, Mistral, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
 
 ```bash
 curl -X POST http://localhost:8088/proxy \
@@ -283,7 +283,7 @@ curl -X POST http://localhost:8088/proxy \
   -d '{"model":"llama3.2","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-No API key needed for Ollama — omit `x-upstream-authorization`. Use `host.docker.internal` instead of `localhost` when running Torrix in Docker.
+No API key needed for Ollama — omit `x-upstream-authorization`. Use `host.docker.internal` instead of `localhost` when running Torrix in Docker on Mac or Windows. On Linux, use your machine's actual IP address (e.g. `172.17.0.1`) instead.
 
 **n8n workflow:** Use the HTTP Request node pointed at `http://host.docker.internal:8088/proxy` with these headers:
 
@@ -348,22 +348,28 @@ Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude ex
 
 ---
 
-## Community Edition
+## Editions
 
-Community edition is free forever. Data is retained for 7 days and older runs are automatically deleted.
+Community is free forever. Pro and Enterprise are coming soon.
 
-| Feature | Community | Pro / Cloud |
-|---|---|---|
-| Users | 1 | Coming Soon |
-| Data retention | 7 days | Coming Soon |
-| Golden runs retention | 14 days | Coming Soon |
-| Runs shown | 100 most recent | Coming Soon |
-| Budget alerts | ✓ | ✓ |
-| Evals & regression testing | ✓ | ✓ |
-| Model cost comparison | ✓ | ✓ |
-| Support | Community | Coming Soon |
+| Feature | Community | Pro | Enterprise |
+|---|---|---|---|
+| Users | 1 | Up to 10 | Unlimited |
+| Data retention | 7 days | 30 days | 90 days |
+| Runs shown | 100 most recent | Unlimited | Unlimited |
+| Budget alerts | ✓ | ✓ | ✓ |
+| Evals & regression testing | ✓ | ✓ | ✓ |
+| Model cost comparison | ✓ | ✓ | ✓ |
+| Prompt version control | — | Coming soon | Coming soon |
+| Prompt playground | — | Coming soon | Coming soon |
+| Scheduled cost reports | — | Coming soon | Coming soon |
+| SSO (SAML / Okta) | — | — | Coming soon |
+| PII detection & masking | — | — | Coming soon |
+| Audit log export | — | — | Coming soon |
+| Helm chart (Kubernetes) | — | — | Coming soon |
+| Support | Community | Priority | Dedicated |
 
-Torrix Cloud is coming soon at [torrix.ai](https://torrix.ai)
+Pro and Enterprise are coming soon at [torrix.ai](https://torrix.ai)
 
 ---
 
@@ -417,3 +423,9 @@ services:
 All data stays on your machine. The SQLite database is stored in `./data/` on your host. Torrix never sends your prompts, responses, or API keys anywhere.
 
 Anonymous telemetry is enabled by default. It sends only your instance ID, OS, and Node version to help improve Torrix. To opt out, set `TORRIX_TELEMETRY=false` in your `docker-compose.yml` as shown above.
+
+---
+
+## Support
+
+For questions or feedback: [contact@torrix.ai](mailto:contact@torrix.ai)

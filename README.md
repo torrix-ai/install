@@ -1,6 +1,6 @@
 # Torrix: AI Observability
 
-Track every LLM request: tokens, cost, latency, and full prompt traces. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, and any HTTP endpoint. Self-hosted, no data leaves your machine.
+Track every LLM request: tokens, cost, latency, full prompt traces, and reasoning token capture. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
 
 ---
 
@@ -17,6 +17,8 @@ curl -o docker-compose.yml https://raw.githubusercontent.com/torrix-ai/install/m
 docker compose up
 ```
 
+> This downloads the community edition config and saves it as `docker-compose.yml` so Docker picks it up automatically.
+
 ### Windows
 
 Open PowerShell and run:
@@ -25,6 +27,8 @@ Open PowerShell and run:
 curl.exe -o docker-compose.yml https://raw.githubusercontent.com/torrix-ai/install/main/docker-compose.community.yml
 docker compose up
 ```
+
+> This downloads the community edition config and saves it as `docker-compose.yml` so Docker picks it up automatically.
 
 Or download the file manually:
 1. Go to [github.com/torrix-ai/install](https://github.com/torrix-ai/install)
@@ -269,6 +273,18 @@ curl -X POST http://localhost:8088/proxy \
   -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
+**Ollama (local models):**
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: http://host.docker.internal:11434/v1/chat/completions" \
+  -H "x-torrix-name: ollama-test" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"llama3.2","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
+No API key needed for Ollama — omit `x-upstream-authorization`. Use `host.docker.internal` instead of `localhost` when running Torrix in Docker.
+
 **n8n workflow:** Use the HTTP Request node pointed at `http://host.docker.internal:8088/proxy` with these headers:
 
 | Header | Value |
@@ -319,13 +335,16 @@ Every API call is logged with token counts, model, cost, and latency. See exactl
 Mark any run as a golden baseline. Replay it against the LLM with one click and compare outputs side-by-side. Catch regressions when switching models or changing prompts.
 
 ### Model cost comparison
-On any run detail page, see what the same request would have cost on every other supported model, sorted cheapest to most expensive.
+On any run detail page, see what the same request would have cost across 300+ models, live priced and sorted cheapest to most expensive.
 
 ### Budget alerts
 Set a daily spend threshold. Torrix fires a webhook (Slack, Discord, or any POST endpoint) when you exceed it. Fires once per day, no noise.
 
 ### Run comparison
 Pick any two runs and compare them side-by-side: model, cost, tokens, latency, prompt, and response.
+
+### Thinking & reasoning capture
+Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, and Ollama Qwen3. Reasoning steps appear in the Event Timeline alongside the final response. Reasoning tokens are tracked separately where the model reports them.
 
 ---
 
@@ -381,7 +400,7 @@ To set environment variables, add an `environment` block to your `docker-compose
 ```yaml
 services:
   torrix:
-    image: adarshr23/torrix:latest
+    image: torrixai/torrix:latest
     ports:
       - "8088:8088"
     volumes:

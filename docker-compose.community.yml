@@ -2,7 +2,7 @@ name: torrix-community
 
 services:
   torrix:
-    image: adarshr23/torrix:latest
+    image: torrixai/torrix:latest
     ports:
       - "8088:8088"
     volumes:

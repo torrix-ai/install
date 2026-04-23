@@ -212,6 +212,7 @@ curl -X POST http://localhost:8088/proxy \
 | `x-torrix-name` | Optional label for this run |
 | `x-torrix-provider` | Optional provider hint: `openai`, `anthropic`, `google` |
 | `x-torrix-trace` | Optional trace ID to group multiple calls into one agent run |
+| `x-torrix-session` | Optional session ID to group a multi-turn conversation |
 
 **Google Gemini** (uses `?key=` instead of Bearer token):
 ```python
@@ -328,6 +329,36 @@ curl -X POST http://localhost:8088/proxy \
 
 Both runs appear in the Runs list with a **trace** badge. Click it to open the chain timeline showing each step with its model, tokens, cost, and latency.
 
+### Conversation session grouping
+
+Add `x-torrix-session` to every call in a multi-turn conversation to group them together. Generate one session ID per conversation and reuse it across all turns:
+
+```bash
+SESSION_ID=$(python3 -c "import uuid; print(uuid.uuid4())")
+
+# Turn 1
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-session: $SESSION_ID" \
+  -H "x-torrix-name: user-message-1" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
+
+# Turn 2 - same SESSION_ID links it to turn 1
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-session: $SESSION_ID" \
+  -H "x-torrix-name: user-message-2" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Follow-up question"}]}'
+```
+
+Runs appear with a **session** badge showing the turn count. Click it to see the full conversation with combined cost and tokens.
+
 ### Real-time cost tracking
 Every API call is logged with token counts, model, cost, and latency. See exactly what you're spending as it happens.
 
@@ -338,7 +369,7 @@ Mark any run as a golden baseline. Replay it against the LLM with one click and 
 On any run detail page, see what the same request would have cost across 300+ models, live priced and sorted cheapest to most expensive.
 
 ### Budget alerts
-Set a daily spend threshold. Torrix fires a webhook (Slack, Discord, or any POST endpoint) when you exceed it. Fires once per day, no noise.
+Set a daily spend threshold. Torrix fires a webhook when you exceed it. Fires once per day, no noise. Slack webhook URLs (`https://hooks.slack.com/…`) are automatically formatted as native Slack messages with Block Kit.
 
 ### Run comparison
 Pick any two runs and compare them side-by-side: model, cost, tokens, latency, prompt, and response.

@@ -284,7 +284,7 @@ curl -X POST http://localhost:8088/proxy \
   -d '{"model":"llama3.2","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-No API key needed for Ollama — omit `x-upstream-authorization`. Use `host.docker.internal` instead of `localhost` when running Torrix in Docker on Mac or Windows. On Linux, use your machine's actual IP address (e.g. `172.17.0.1`) instead.
+No API key needed for Ollama: omit `x-upstream-authorization`. Use `host.docker.internal` instead of `localhost` when running Torrix in Docker on Mac or Windows. On Linux, use your machine's actual IP address (e.g. `172.17.0.1`) instead.
 
 **n8n workflow:** Use the HTTP Request node pointed at `http://host.docker.internal:8088/proxy` with these headers:
 
@@ -389,6 +389,9 @@ Set a daily spend threshold. Torrix fires a webhook when you exceed it. Fires on
 ### Run comparison
 Pick any two runs and compare them side-by-side: model, cost, tokens, latency, prompt, and response.
 
+### Run scoring
+On any run detail page, click **👍 Good** or **👎 Bad** to score the response. Add an optional note. Scored runs show a green or red badge in the runs list so you can track which responses were correct or incorrect. Use this to build a labelled dataset for evals without leaving the dashboard.
+
 ### Thinking & reasoning capture
 Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, and Ollama Qwen3. Reasoning steps appear in the Event Timeline alongside the final response. Reasoning tokens are tracked separately where the model reports them.
 
@@ -404,15 +407,16 @@ Community is free forever. Pro and Enterprise are coming soon.
 | Data retention | 7 days | 30 days | 90 days |
 | Runs shown | 100 most recent | Unlimited | Unlimited |
 | Budget alerts | ✓ | ✓ | ✓ |
-| Evals & regression testing | ✓ | ✓ | ✓ |
+| Evals &amp; regression testing | ✓ | ✓ | ✓ |
 | Model cost comparison | ✓ | ✓ | ✓ |
-| Prompt version control | — | Coming soon | Coming soon |
-| Prompt playground | — | Coming soon | Coming soon |
-| Scheduled cost reports | — | Coming soon | Coming soon |
-| SSO (SAML / Okta) | — | — | Coming soon |
-| PII detection & masking | — | — | Coming soon |
-| Audit log export | — | — | Coming soon |
-| Helm chart (Kubernetes) | — | — | Coming soon |
+| Run scoring | ✓ | ✓ | ✓ |
+| Prompt version control | No | Coming soon | Coming soon |
+| Prompt playground | No | Coming soon | Coming soon |
+| Scheduled cost reports | No | Coming soon | Coming soon |
+| SSO (SAML / Okta) | No | No | Coming soon |
+| PII detection &amp; masking | No | No | Coming soon |
+| Audit log export | No | No | Coming soon |
+| Helm chart (Kubernetes) | No | No | Coming soon |
 | Support | Community | Priority | Dedicated |
 
 Pro and Enterprise are coming soon at [torrix.ai](https://torrix.ai)

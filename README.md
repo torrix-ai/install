@@ -390,7 +390,10 @@ Set a daily spend threshold. Torrix fires a webhook when you exceed it. Fires on
 Pick any two runs and compare them side-by-side: model, cost, tokens, latency, prompt, and response.
 
 ### Run scoring
-On any run detail page, click **👍 Good** or **👎 Bad** to score the response. Add an optional note. Scored runs show a green or red badge in the runs list so you can track which responses were correct or incorrect. Use this to build a labelled dataset for evals without leaving the dashboard.
+On any run detail page, click **👍 Good** or **👎 Bad** to score the response. Add an optional note. Scored runs show a green or red badge in the runs list. Use the **Score** filter dropdown to show only good runs, only bad runs, or only unscored runs. Export runs to CSV to download your scored dataset for offline eval pipelines.
+
+### CSV export
+Click **Export CSV** on the Runs page to download all currently filtered runs as a CSV file. The file includes run ID, name, provider, model, status, tokens, cost, latency, finish reason, source, score, score note, and timestamp. Apply filters first to export a subset such as only good runs or only a specific model.
 
 ### Thinking & reasoning capture
 Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, and Ollama Qwen3. Reasoning steps appear in the Event Timeline alongside the final response. Reasoning tokens are tracked separately where the model reports them.
@@ -410,6 +413,7 @@ Community is free forever. Pro and Enterprise are coming soon.
 | Evals &amp; regression testing | ✓ | ✓ | ✓ |
 | Model cost comparison | ✓ | ✓ | ✓ |
 | Run scoring | ✓ | ✓ | ✓ |
+| CSV export | ✓ | ✓ | ✓ |
 | Prompt version control | No | Coming soon | Coming soon |
 | Prompt playground | No | Coming soon | Coming soon |
 | Scheduled cost reports | No | Coming soon | Coming soon |

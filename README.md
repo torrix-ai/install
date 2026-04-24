@@ -300,7 +300,7 @@ No API key needed for Ollama — omit `x-upstream-authorization`. Use `host.dock
 Install the official Torrix node directly in n8n for a native drag-and-drop experience:
 
 1. In n8n, go to **Settings → Community Nodes**
-2. Click **Install** and enter `n8n-nodes-torrix`
+2. Click **Install** and enter `@torrix-ai/n8n-nodes-torrix`
 3. Restart n8n when prompted
 4. The **Torrix Proxy** node will appear in your node palette
 

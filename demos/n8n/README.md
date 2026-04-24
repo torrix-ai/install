@@ -1,6 +1,6 @@
 # Demo: AI Support Triage with n8n and Torrix
 
-This demo shows how to build an AI-powered support ticket router in n8n and use Torrix to observe every LLM call — what was sent, what came back, how much it cost, and how long it took.
+This demo shows how to build an AI-powered support ticket router in n8n and use Torrix to observe every LLM call: what was sent, what came back, how much it cost, and how long it took.
 
 The workflow classifies an incoming support ticket into a category (bug, billing, feature, or general) and routes it to the appropriate response. Bug reports go to a more capable model for a detailed reply. Everything else uses a cheaper model. Torrix groups both LLM calls into a single trace so you can compare cost and latency across steps.
 

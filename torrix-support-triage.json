@@ -1,0 +1,212 @@
+{
+  "name": "Torrix AI Support Triage Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 380]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "22222222-1111-1111-1111-111111111111",
+              "name": "ticket",
+              "value": "My API calls started returning 500 errors after I upgraded to v2.3. I am using the Python SDK with streaming. It worked fine on v2.2. Please help urgently.",
+              "type": "string"
+            },
+            {
+              "id": "22222222-2222-2222-2222-222222222222",
+              "name": "trace_id",
+              "value": "={{ $execution.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22222222-1111-1111-1111-111111111112",
+      "name": "Set Ticket",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 380],
+      "notes": "Edit the 'ticket' value to test different scenarios. The trace_id is set automatically from the execution ID so every run gets a unique trace in Torrix."
+    },
+    {
+      "parameters": {
+        "targetUrl": "",
+        "upstreamApiKey": "",
+        "model": "gpt-4o-mini",
+        "prompt": "={{ $json.ticket }}",
+        "systemPrompt": "You are a support ticket classifier. Classify this ticket into exactly one word: bug, billing, feature, or general. Reply with only the single category word, nothing else.",
+        "runName": "classify",
+        "sessionId": "",
+        "traceId": "={{ $json.trace_id }}",
+        "additionalFields": {}
+      },
+      "id": "33333333-1111-1111-1111-111111111111",
+      "name": "Classify Ticket",
+      "type": "@torrix-ai/n8n-nodes-torrix.torrixProxy",
+      "typeVersion": 1,
+      "position": [700, 380],
+      "credentials": {
+        "torrixApi": {
+          "id": "",
+          "name": "Torrix account"
+        }
+      },
+      "notes": "Uses gpt-4o-mini (cheap) just to classify. Check Torrix to see the cost of this step vs the response step."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "44444444-1111-1111-1111-111111111111",
+              "name": "classification",
+              "value": "={{ $json.choices[0].message.content.toLowerCase().trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "44444444-2222-2222-2222-222222222222",
+              "name": "ticket",
+              "value": "={{ $('Set Ticket').item.json.ticket }}",
+              "type": "string"
+            },
+            {
+              "id": "44444444-3333-3333-3333-333333333333",
+              "name": "trace_id",
+              "value": "={{ $('Set Ticket').item.json.trace_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "44444444-1111-1111-1111-111111111112",
+      "name": "Extract Classification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [940, 380]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "55555555-1111-1111-1111-111111111111",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "bug",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "55555555-1111-1111-1111-111111111112",
+      "name": "Route by Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1180, 380],
+      "notes": "True (top) = bug ticket → uses gpt-4o for a higher quality response. False (bottom) = everything else → uses gpt-4o-mini to keep cost low."
+    },
+    {
+      "parameters": {
+        "targetUrl": "",
+        "upstreamApiKey": "",
+        "model": "gpt-4o",
+        "prompt": "=Customer ticket:\n{{ $json.ticket }}\n\nClassification: {{ $json.classification }}\n\nWrite a professional, empathetic support response that addresses this bug report with clear next steps for the customer.",
+        "systemPrompt": "You are a senior support engineer. Write clear, actionable responses to bug reports. Always include: 1) acknowledgement of the issue, 2) likely cause, 3) steps to resolve.",
+        "runName": "respond-bug",
+        "sessionId": "",
+        "traceId": "={{ $json.trace_id }}",
+        "additionalFields": {}
+      },
+      "id": "66666666-1111-1111-1111-111111111111",
+      "name": "Bug Response",
+      "type": "@torrix-ai/n8n-nodes-torrix.torrixProxy",
+      "typeVersion": 1,
+      "position": [1420, 240],
+      "credentials": {
+        "torrixApi": {
+          "id": "",
+          "name": "Torrix account"
+        }
+      },
+      "notes": "Uses gpt-4o (more expensive, higher quality) for bug reports. Open the trace in Torrix to see this step costs more than the classify step."
+    },
+    {
+      "parameters": {
+        "targetUrl": "",
+        "upstreamApiKey": "",
+        "model": "gpt-4o-mini",
+        "prompt": "=Customer ticket:\n{{ $json.ticket }}\n\nClassification: {{ $json.classification }}\n\nWrite a helpful, friendly support response that answers the customer clearly.",
+        "systemPrompt": "You are a friendly customer support agent. Write clear, helpful, and concise responses.",
+        "runName": "respond-general",
+        "sessionId": "",
+        "traceId": "={{ $json.trace_id }}",
+        "additionalFields": {}
+      },
+      "id": "77777777-1111-1111-1111-111111111111",
+      "name": "General Response",
+      "type": "@torrix-ai/n8n-nodes-torrix.torrixProxy",
+      "typeVersion": 1,
+      "position": [1420, 520],
+      "credentials": {
+        "torrixApi": {
+          "id": "",
+          "name": "Torrix account"
+        }
+      },
+      "notes": "Uses gpt-4o-mini to keep cost low for non-bug tickets."
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [{"node": "Set Ticket", "type": "main", "index": 0}]
+      ]
+    },
+    "Set Ticket": {
+      "main": [
+        [{"node": "Classify Ticket", "type": "main", "index": 0}]
+      ]
+    },
+    "Classify Ticket": {
+      "main": [
+        [{"node": "Extract Classification", "type": "main", "index": 0}]
+      ]
+    },
+    "Extract Classification": {
+      "main": [
+        [{"node": "Route by Type", "type": "main", "index": 0}]
+      ]
+    },
+    "Route by Type": {
+      "main": [
+        [{"node": "Bug Response", "type": "main", "index": 0}],
+        [{"node": "General Response", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "torrix-support-triage",
+    "instanceId": "torrix"
+  }
+}

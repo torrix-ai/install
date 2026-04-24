@@ -295,6 +295,21 @@ No API key needed for Ollama — omit `x-upstream-authorization`. Use `host.dock
 | `x-upstream-authorization` | `Bearer <your-openai-key>` |
 | `Content-Type` | `application/json` |
 
+### n8n Community Node
+
+Install the official Torrix node directly in n8n for a native drag-and-drop experience:
+
+1. In n8n, go to **Settings → Community Nodes**
+2. Click **Install** and enter `n8n-nodes-torrix`
+3. Restart n8n when prompted
+4. The **Torrix Proxy** node will appear in your node palette
+
+Or import the ready-to-use workflow template:
+
+1. Download [torrix-workflow-template.json](torrix/n8n/torrix-workflow-template.json)
+2. In n8n, go to **Workflows → Import from file**
+3. Follow the setup notes inside the workflow
+
 ---
 
 ## Features
@@ -446,6 +461,46 @@ services:
       - TORRIX_TELEMETRY=false
     restart: unless-stopped
 ```
+
+---
+
+## Grafana / Prometheus
+
+Torrix exposes a `/metrics` endpoint in Prometheus text format. Scrape it to build Grafana dashboards with your existing monitoring stack.
+
+**Scrape the endpoint:**
+
+```bash
+curl http://localhost:8088/metrics -H "Authorization: Bearer <your-torrix-api-key>"
+```
+
+**Example output:**
+```
+torrix_requests_total 142
+torrix_cost_usd_total 0.023400
+torrix_tokens_total 58300
+torrix_errors_total 2
+torrix_latency_p50_ms 312
+torrix_latency_p95_ms 891
+torrix_latency_p99_ms 1423
+torrix_requests_by_model{model="gpt-4o-mini"} 98
+torrix_requests_by_model{model="claude-3-5-sonnet-20241022"} 44
+```
+
+**Prometheus `prometheus.yml` scrape config:**
+
+```yaml
+scrape_configs:
+  - job_name: torrix
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['host.docker.internal:8088']
+    metrics_path: /metrics
+    authorization:
+      credentials: <your-torrix-api-key>
+```
+
+Add this to your Prometheus config and create a Grafana dashboard using the `torrix_*` metrics.
 
 ---
 

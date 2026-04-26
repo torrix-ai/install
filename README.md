@@ -395,6 +395,66 @@ On any run detail page, click **👍 Good** or **👎 Bad** to score the respons
 ### CSV export
 Click **Export CSV** on the Runs page to download all currently filtered runs as a CSV file. The file includes run ID, name, provider, model, status, tokens, cost, latency, finish reason, source, score, score note, and timestamp. Apply filters first to export a subset such as only good runs or only a specific model.
 
+### MCP server
+
+Query your Torrix data directly from Claude Code, Claude Desktop, or any MCP-compatible AI assistant.
+
+**Step 1: Get your API key** from Settings in the Torrix UI.
+
+**Step 2: Add to your Claude Code config** (`~/.claude.json` or your project's `.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "torrix": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "/absolute/path/to/torrix/server/src/mcp.ts"],
+      "env": {
+        "TORRIX_API_KEY": "trxk_your_key_here",
+        "TORRIX_BASE_URL": "http://localhost:8088"
+      }
+    }
+  }
+}
+```
+
+**Step 3: For Claude Desktop**, add to `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "torrix": {
+      "command": "npx",
+      "args": ["tsx", "/absolute/path/to/torrix/server/src/mcp.ts"],
+      "env": {
+        "TORRIX_API_KEY": "trxk_your_key_here",
+        "TORRIX_BASE_URL": "http://localhost:8088"
+      }
+    }
+  }
+}
+```
+
+**Available tools:**
+
+| Tool | What it does |
+|---|---|
+| `get_dashboard` | Total cost, tokens, runs, error count, latency percentiles, top models |
+| `list_runs` | Recent runs with optional filters: model, provider, status |
+| `get_run` | Full run details including prompt and response text |
+| `get_trace` | All steps in an agent trace with per-step cost and latency |
+| `get_session` | All turns in a conversation session with combined cost |
+| `compare_runs` | Side-by-side diff of two runs: model, cost, tokens, latency, responses |
+
+**Example prompts once connected:**
+- "What did I spend on LLM calls today?"
+- "Show me failed runs from the last hour"
+- "What was the prompt and response for run [id]?"
+- "Compare run [id1] and run [id2]"
+
+Community edition returns up to 100 runs from the last 7 days. Pro returns the full 30-day history.
+
 ### Thinking & reasoning capture
 Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, and Ollama Qwen3. Reasoning steps appear in the Event Timeline alongside the final response. Reasoning tokens are tracked separately where the model reports them.
 
@@ -414,6 +474,7 @@ Community is free forever. Pro and Enterprise are coming soon.
 | Model cost comparison | ✓ | ✓ | ✓ |
 | Run scoring | ✓ | ✓ | ✓ |
 | CSV export | ✓ | ✓ | ✓ |
+| MCP server | ✓ | ✓ | ✓ |
 | Prompt version control | No | Coming soon | Coming soon |
 | Prompt playground | No | Coming soon | Coming soon |
 | Scheduled cost reports | No | Coming soon | Coming soon |

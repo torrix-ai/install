@@ -397,7 +397,7 @@ Click **Export CSV** on the Runs page to download all currently filtered runs as
 
 ### MCP server
 
-Query your Torrix data directly from Claude Code, Claude Desktop, or any MCP-compatible AI assistant.
+Torrix includes a built-in MCP endpoint at `/mcp`. No extra setup or source code required. Connect Claude Code, Claude Desktop, n8n, or any MCP-compatible client directly to your running Torrix instance.
 
 **Step 1: Get your API key** from Settings in the Torrix UI.
 
@@ -407,12 +407,10 @@ Query your Torrix data directly from Claude Code, Claude Desktop, or any MCP-com
 {
   "mcpServers": {
     "torrix": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["tsx", "/absolute/path/to/torrix/server/src/mcp.ts"],
-      "env": {
-        "TORRIX_API_KEY": "trxk_your_key_here",
-        "TORRIX_BASE_URL": "http://localhost:8088"
+      "type": "http",
+      "url": "http://localhost:8088/mcp",
+      "headers": {
+        "Authorization": "Bearer trxk_your_key_here"
       }
     }
   }
@@ -425,16 +423,22 @@ Query your Torrix data directly from Claude Code, Claude Desktop, or any MCP-com
 {
   "mcpServers": {
     "torrix": {
-      "command": "npx",
-      "args": ["tsx", "/absolute/path/to/torrix/server/src/mcp.ts"],
-      "env": {
-        "TORRIX_API_KEY": "trxk_your_key_here",
-        "TORRIX_BASE_URL": "http://localhost:8088"
+      "type": "http",
+      "url": "http://localhost:8088/mcp",
+      "headers": {
+        "Authorization": "Bearer trxk_your_key_here"
       }
     }
   }
 }
 ```
+
+**Step 4: For n8n** (when both n8n and Torrix run in Docker), use `host.docker.internal` instead of `localhost`:
+
+Add an **MCP Client** node in your n8n workflow and set:
+- Transport: Streamable HTTP
+- URL: `http://host.docker.internal:8088/mcp`
+- Header: `Authorization: Bearer trxk_your_key_here`
 
 **Available tools:**
 

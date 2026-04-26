@@ -98,9 +98,37 @@ Pick any two runs from the Evals page or the runs list and compare them side-by-
 
 ---
 
-## Run scoring
+## Run scoring and LLM judge
 
 Rate any response as good or bad from the run detail page using the thumbs up / thumbs down buttons. Add an optional note. Scored runs show a green or red badge in the runs list.
+
+### Manual scoring
+
+Click the thumbs up or thumbs down button on any run detail page. Add an optional note to record why.
+
+### Auto-score with an AI judge
+
+Click **Auto-score with AI** on any run detail page to let an LLM evaluate the response automatically.
+
+1. Select the provider: **OpenAI-compatible** (OpenAI, Groq, Mistral, DeepSeek, Ollama, and any provider using the `/v1/chat/completions` format) or **Anthropic**
+2. Paste your API key for that provider
+3. For OpenAI-compatible providers, optionally enter a custom base URL (defaults to `https://api.openai.com`). Examples:
+   - Groq: `https://api.groq.com/openai`
+   - Ollama: `http://localhost:11434`
+   - Mistral: `https://api.mistral.ai`
+4. Optionally enter a custom model (defaults to `gpt-4o-mini` for OpenAI-compatible, `claude-haiku-4-5-20251001` for Anthropic)
+5. Optionally enter custom evaluation criteria
+6. Click **Auto-score**
+
+The judge sends the run's prompt and response to the selected LLM, which returns a good or bad verdict with a one-sentence reason. The result is saved as the run's score and note, the same as a manual score.
+
+Default criteria when none is specified: "Evaluate correctness, helpfulness, and clarity."
+
+Custom criteria example: "The response should be concise and under 100 words. Penalise any hallucinated facts."
+
+**Note:** Your API key is sent directly to OpenAI or Anthropic for the judge call. It is not stored in Torrix.
+
+### Filtering and export
 
 **Filtering:** Use the **Score** dropdown on the Runs page to show only good runs, only bad runs, or only unscored runs.
 

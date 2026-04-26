@@ -39,7 +39,7 @@ Or download the file manually:
 1. Open [http://localhost:8088](http://localhost:8088)
 2. Create your account
 3. Copy your API key from Settings
-4. Start sending LLM calls through the proxy or SDK — see [Integrations](docs/integrations.md)
+4. Start sending LLM calls through the proxy or SDK. See [Integrations](docs/integrations.md)
 
 ### Verify your setup
 
@@ -53,18 +53,18 @@ Expected response: `{"ok":true,"name":"Torrix","version":"0.1.0"}`
 
 ## Features
 
-- **Agent trace grouping** — group multi-step agent calls into a single timeline. [How to use](docs/features.md#agent-trace-grouping)
-- **Conversation session grouping** — track cost and tokens across a full multi-turn conversation. [How to use](docs/features.md#conversation-session-grouping)
-- **Real-time cost tracking** — dollar cost on every call, live in your dashboard
-- **Regression testing (Evals)** — mark golden runs, replay against any model, compare outputs side-by-side. [How to use](docs/features.md#regression-testing-evals)
-- **Model cost comparison** — see what a run would have cost across 300+ models
-- **Budget alerts** — webhook when daily spend exceeds a threshold (Slack supported natively)
-- **Run comparison** — side-by-side diff of any two runs: model, cost, tokens, latency, prompt, response
-- **Run scoring** — rate responses good or bad, export as a labelled eval dataset. [How to use](docs/features.md#run-scoring)
-- **CSV export** — download filtered runs including score and score note
-- **MCP server** — query your data from any MCP-compatible AI assistant. [How to use](docs/mcp.md)
-- **Grafana / Prometheus export** — scrape `/metrics` into your existing monitoring stack. [How to use](docs/grafana-prometheus.md)
-- **Thinking and reasoning capture** — captures chain-of-thought from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, Ollama Qwen3
+- **Agent trace grouping**: group multi-step agent calls into a single timeline. [How to use](docs/features.md#agent-trace-grouping)
+- **Conversation session grouping**: track cost and tokens across a full multi-turn conversation. [How to use](docs/features.md#conversation-session-grouping)
+- **Real-time cost tracking**: dollar cost on every call, live in your dashboard
+- **Regression testing (Evals)**: mark golden runs, replay against any model, compare outputs side-by-side. [How to use](docs/features.md#regression-testing-evals)
+- **Model cost comparison**: see what a run would have cost across 300+ models
+- **Budget alerts**: webhook when daily spend exceeds a threshold (Slack supported natively)
+- **Run comparison**: side-by-side diff of any two runs: model, cost, tokens, latency, prompt, response
+- **Run scoring and LLM judge**: rate responses manually or auto-score with an AI judge that evaluates prompt quality, response correctness, token efficiency, and reasoning depth. Batch-score multiple runs at once. Export as a labelled eval dataset. [How to use](docs/features.md#run-scoring)
+- **CSV export**: download filtered runs including score and score note
+- **MCP server**: query your data from any MCP-compatible AI assistant. [How to use](docs/mcp.md)
+- **Grafana / Prometheus export**: scrape `/metrics` into your existing monitoring stack. [How to use](docs/grafana-prometheus.md)
+- **Thinking and reasoning capture**: captures chain-of-thought from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, Ollama Qwen3
 
 ---
 
@@ -119,7 +119,7 @@ Your data is preserved in the `./data/` folder and will be available when you st
 
 All data stays on your machine. The SQLite database is stored in `./data/` on your host. Torrix never sends your prompts, responses, or API keys anywhere.
 
-Anonymous telemetry is enabled by default. It sends only your instance ID, OS, and Node version to help improve Torrix. To opt out, set `TORRIX_TELEMETRY=false` in your `docker-compose.yml` — see [Configuration](docs/configuration.md).
+Anonymous telemetry is enabled by default. It sends only your instance ID, OS, and Node version to help improve Torrix. To opt out, set `TORRIX_TELEMETRY=false` in your `docker-compose.yml`. See [Configuration](docs/configuration.md).
 
 ---
 

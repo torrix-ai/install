@@ -397,7 +397,33 @@ Click **Export CSV** on the Runs page to download all currently filtered runs as
 
 ### MCP server
 
-Torrix includes a built-in MCP endpoint at `/mcp`. No extra setup or source code required. Connect Claude Code, Claude Desktop, n8n, or any MCP-compatible client directly to your running Torrix instance.
+Torrix includes a built-in MCP endpoint at `/mcp`. Connect any MCP-compatible AI assistant (Claude Code, Claude Desktop, Cursor, Windsurf, n8n, and others) directly to your running Torrix instance. No extra setup or source code required.
+
+**Verify the MCP endpoint is working** (replace with your API key from Settings):
+
+**Mac / Linux:**
+```bash
+curl -X POST http://localhost:8088/mcp \
+  -H "Authorization: Bearer trxk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_dashboard","arguments":{}}}'
+```
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest http://localhost:8088/mcp `
+  -Method POST `
+  -Headers @{ Authorization="Bearer trxk_your_key_here"; "Content-Type"="application/json"; Accept="application/json, text/event-stream" } `
+  -Body '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_dashboard","arguments":{}}}' |
+  Select-Object -ExpandProperty Content
+```
+
+Expected response:
+```
+event: message
+data: {"result":{"content":[{"type":"text","text":"Total runs: ...\nTotal cost: ..."}]},"jsonrpc":"2.0","id":1}
+```
 
 **Step 1: Get your API key** from Settings in the Torrix UI.
 

@@ -415,8 +415,53 @@ curl -X POST http://localhost:8088/proxy \
 
 The value is a float between 0 and 1. `0.1` logs roughly 10% of requests. `1` logs all (the default when the header is omitted). `0` logs nothing. Errors are always logged regardless of sample rate. Useful for high-volume production deployments where you want cost and latency trends without storing every individual run.
 
-### Run comparison
-Pick any two runs and compare them side-by-side: model, cost, tokens, latency, prompt, and response.
+### Tool call tracing
+
+Every tool call made by an agent is automatically captured as a separate event in the run trace. Works with OpenAI function calling, Anthropic tool use, and Gemini function calling. Open any run detail page and the Event Timeline shows each tool that fired, with its name and arguments.
+
+No extra headers or configuration needed. Torrix extracts tool calls from the upstream response automatically.
+
+### Outbound webhooks
+
+Torrix fires HTTP webhooks on two events:
+
+- **Budget threshold crossed**: fires when your daily spend reaches the alert threshold (once per day)
+- **LLM request error**: fires when an upstream request returns HTTP 4xx or 5xx
+
+Configure the webhook URL in Settings. Slack webhook URLs (`https://hooks.slack.com/`) are automatically formatted as native Slack Block Kit messages. All other URLs receive a JSON payload.
+
+See [docs/webhooks.md](docs/webhooks.md) for payload shapes and PagerDuty setup.
+
+### OpenTelemetry receiver
+
+Torrix accepts OTLP/HTTP (JSON) traces at `POST /v1/traces`. Any application already instrumented with the OpenTelemetry SDK can send LLM spans to Torrix with no additional code changes.
+
+```bash
+curl -X POST http://localhost:8088/v1/traces \
+  -H "x-torrix-api-key: <your-torrix-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [{
+      "scopeSpans": [{
+        "spans": [{
+          "name": "chat",
+          "startTimeUnixNano": "1714220000000000000",
+          "endTimeUnixNano":   "1714220001500000000",
+          "attributes": [
+            {"key": "gen_ai.system",              "value": {"stringValue": "openai"}},
+            {"key": "gen_ai.request.model",       "value": {"stringValue": "gpt-4o-mini"}},
+            {"key": "gen_ai.usage.input_tokens",  "value": {"intValue": 512}},
+            {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 128}}
+          ]
+        }]
+      }]
+    }]
+  }'
+```
+
+See [docs/otel.md](docs/otel.md) for the full attribute mapping table and a Python SDK example.
+
+
 
 ### Thinking & reasoning capture
 Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, and Ollama Qwen3. Reasoning steps appear in the Event Timeline alongside the final response. Reasoning tokens are tracked separately where the model reports them.
@@ -444,37 +489,26 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 
 ## Editions
 
+Community is free forever. Pro and Enterprise are coming soon.
+
 | Feature | Community | Pro | Enterprise |
 |---|---|---|---|
 | Users | 1 | Up to 10 | Unlimited |
 | Data retention | 7 days | 30 days | 90 days |
 | Runs shown | 100 most recent | Unlimited | Unlimited |
-| Budget alerts | Yes | Yes | Yes |
-| Evals and regression testing | Yes | Yes | Yes |
-| Model cost comparison | Yes | Yes | Yes |
+| Budget alerts | ✓ | ✓ | ✓ |
+| Evals & regression testing | ✓ | ✓ | ✓ |
+| Model cost comparison | ✓ | ✓ | ✓ |
 | Prompt version control | No | Coming soon | Coming soon |
 | Prompt playground | No | Coming soon | Coming soon |
 | Scheduled cost reports | No | Coming soon | Coming soon |
 | SSO (SAML / Okta) | No | No | Coming soon |
-| PII detection and masking | No | No | Coming soon |
+| PII detection & masking | No | No | Coming soon |
 | Audit log export | No | No | Coming soon |
 | Helm chart (Kubernetes) | No | No | Coming soon |
 | Support | Community | Priority | Dedicated |
 
-Community is free forever. Pro is available now at a founding member price of $19/month. Email [contact@torrix.ai](mailto:contact@torrix.ai?subject=Torrix%20Pro) to get your license key.
-
----
-
-## Activating a Pro License
-
-Once you have a license key from [contact@torrix.ai](mailto:contact@torrix.ai?subject=Torrix%20Pro):
-
-1. Open the Torrix dashboard at [http://localhost:8088](http://localhost:8088)
-2. Go to **Settings** (gear icon in the sidebar)
-3. Scroll to the **Pro License** section
-4. Paste your license key and click **Activate**
-
-Activation takes effect immediately. No server restart required. The Edition card at the top of Settings will update to show your active plan and expiry date.
+Pro and Enterprise are coming soon at [torrix.ai](https://torrix.ai)
 
 ---
 

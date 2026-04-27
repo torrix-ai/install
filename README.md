@@ -461,7 +461,15 @@ curl -X POST http://localhost:8088/v1/traces \
 
 See [docs/otel.md](docs/otel.md) for the full attribute mapping table and a Python SDK example.
 
+### Cost forecasting
 
+The home dashboard shows a projected month-end spend figure beneath the budget status bar. Torrix calculates your average daily cost from the current month's runs and extrapolates it to the end of the month. The forecast is color-coded: green when on track, amber when approaching your budget, and red when the projection exceeds it. No extra configuration is needed beyond setting a budget in Settings.
+
+### Streaming instrumentation
+
+Streaming responses (requests sent with `"stream": true` or `Accept: text/event-stream`) are now fully instrumented. Torrix pipes each SSE chunk to your client in real time with no added latency, while simultaneously accumulating the stream. When the stream closes, Torrix extracts the model name, input and output token counts, cost, and finish reason from the accumulated chunks and backfills the run record. The full response text is saved as a RESPONSE event in the run timeline, just like a non-streaming request.
+
+Supported formats: OpenAI-compatible (including Groq, Mistral, NVIDIA, Together, Ollama) and Anthropic.
 
 ### Thinking & reasoning capture
 Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, and Ollama Qwen3. Reasoning steps appear in the Event Timeline alongside the final response. Reasoning tokens are tracked separately where the model reports them.

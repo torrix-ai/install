@@ -444,26 +444,37 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 
 ## Editions
 
-Community is free forever. Pro and Enterprise are coming soon.
-
 | Feature | Community | Pro | Enterprise |
 |---|---|---|---|
 | Users | 1 | Up to 10 | Unlimited |
 | Data retention | 7 days | 30 days | 90 days |
 | Runs shown | 100 most recent | Unlimited | Unlimited |
-| Budget alerts | ✓ | ✓ | ✓ |
-| Evals & regression testing | ✓ | ✓ | ✓ |
-| Model cost comparison | ✓ | ✓ | ✓ |
+| Budget alerts | Yes | Yes | Yes |
+| Evals and regression testing | Yes | Yes | Yes |
+| Model cost comparison | Yes | Yes | Yes |
 | Prompt version control | No | Coming soon | Coming soon |
 | Prompt playground | No | Coming soon | Coming soon |
 | Scheduled cost reports | No | Coming soon | Coming soon |
 | SSO (SAML / Okta) | No | No | Coming soon |
-| PII detection & masking | No | No | Coming soon |
+| PII detection and masking | No | No | Coming soon |
 | Audit log export | No | No | Coming soon |
 | Helm chart (Kubernetes) | No | No | Coming soon |
 | Support | Community | Priority | Dedicated |
 
-Pro and Enterprise are coming soon at [torrix.ai](https://torrix.ai)
+Community is free forever. Pro is available now at a founding member price of $19/month. Email [contact@torrix.ai](mailto:contact@torrix.ai?subject=Torrix%20Pro) to get your license key.
+
+---
+
+## Activating a Pro License
+
+Once you have a license key from [contact@torrix.ai](mailto:contact@torrix.ai?subject=Torrix%20Pro):
+
+1. Open the Torrix dashboard at [http://localhost:8088](http://localhost:8088)
+2. Go to **Settings** (gear icon in the sidebar)
+3. Scroll to the **Pro License** section
+4. Paste your license key and click **Activate**
+
+Activation takes effect immediately. No server restart required. The Edition card at the top of Settings will update to show your active plan and expiry date.
 
 ---
 

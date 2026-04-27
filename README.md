@@ -467,12 +467,18 @@ The home dashboard shows a projected month-end spend figure beneath the budget s
 
 ### Streaming instrumentation
 
-Streaming responses (requests sent with `"stream": true` or `Accept: text/event-stream`) are now fully instrumented. Torrix pipes each SSE chunk to your client in real time with no added latency, while simultaneously accumulating the stream. When the stream closes, Torrix extracts the model name, input and output token counts, cost, and finish reason from the accumulated chunks and backfills the run record. The full response text is saved as a RESPONSE event in the run timeline, just like a non-streaming request.
+Streaming responses (requests sent with `"stream": true` or `Accept: text/event-stream`) are fully instrumented with no added latency. Torrix accumulates SSE chunks while piping them to your client in real time. When the stream closes, each run is backfilled with:
 
-Supported formats: OpenAI-compatible (including Groq, Mistral, NVIDIA, Together, Ollama) and Anthropic.
+- Model name, input and output token counts, and cost
+- Full response text saved as a RESPONSE event in the timeline
+- Chain-of-thought reasoning saved as a THINKING event (Kimi K2, DeepSeek R1, Qwen3, and similar thinking models that emit `delta.reasoning` chunks)
+- Tool calls saved as TOOL CALL events, identical to non-streaming tool call tracing
+
+Supported formats: OpenAI-compatible (OpenAI, Groq, Mistral, NVIDIA, Together, Ollama) and Anthropic. NVIDIA-hosted models that send usage in a dedicated final chunk (e.g. Kimi K2.5, DeepSeek R1) are fully supported.
 
 ### Thinking & reasoning capture
-Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, and Ollama Qwen3. Reasoning steps appear in the Event Timeline alongside the final response. Reasoning tokens are tracked separately where the model reports them.
+
+Captures chain-of-thought reasoning from OpenAI o1/o3/o4, DeepSeek R1, Claude extended thinking, Gemini 2.5, Ollama Qwen3, and Kimi K2. Reasoning steps appear in the Event Timeline alongside the final response. Works for both standard and streaming requests. Reasoning tokens are tracked separately where the model reports them.
 
 ### Run scoring and LLM judge
 

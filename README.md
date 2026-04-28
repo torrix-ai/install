@@ -110,18 +110,21 @@ Then open [http://localhost:8088](http://localhost:8088). The run should appear 
 pip install torrix
 ```
 
+Call `torrix.init()` once — Torrix automatically traces every OpenAI and Anthropic call in your process, including calls made inside LangGraph, CrewAI, AutoGen, and any other agent framework.
+
 **OpenAI:**
 ```python
 import torrix
 from openai import OpenAI
 
 torrix.init(api_key="<your-torrix-api-key>", base_url="http://localhost:8088")
-client = torrix.wrap(OpenAI(api_key="<your-openai-key>"))
+
+# No torrix.wrap() needed — all clients traced automatically
+client = OpenAI(api_key="<your-openai-key>")
 
 response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}],
-    torrix_name="my-run",
 )
 print(response.choices[0].message.content)
 ```
@@ -130,13 +133,12 @@ print(response.choices[0].message.content)
 ```python
 from anthropic import Anthropic
 
-client = torrix.wrap(Anthropic(api_key="<your-anthropic-key>"))
+client = Anthropic(api_key="<your-anthropic-key>")
 
 response = client.messages.create(
     model="claude-3-5-sonnet-20241022",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
-    torrix_name="my-run",
 )
 print(response.content[0].text)
 ```
@@ -151,6 +153,8 @@ stream = client.chat.completions.create(
 for chunk in stream:
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
+
+See [docs/auto-instrumentation.md](docs/auto-instrumentation.md) for agent framework examples and advanced usage.
 
 ### Option 2: Node.js SDK
 

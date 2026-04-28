@@ -10,33 +10,40 @@ Send LLM calls to Torrix using the Python SDK, Node.js SDK, or HTTP proxy. The p
 pip install torrix
 ```
 
-**OpenAI:**
+Call `torrix.init()` once — Torrix automatically traces every OpenAI and Anthropic call in your process, including calls made by agent frameworks that create their own clients internally.
+
+**Auto-instrumentation (recommended):**
 ```python
 import torrix
 from openai import OpenAI
 
 torrix.init(api_key="<your-torrix-api-key>", base_url="http://localhost:8088")
-client = torrix.wrap(OpenAI(api_key="<your-openai-key>"))
+
+# No torrix.wrap() needed — all clients are traced automatically
+client = OpenAI(api_key="<your-openai-key>")
 
 response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}],
-    torrix_name="my-run",
 )
 print(response.choices[0].message.content)
 ```
 
+This works for clients you create directly and for clients created inside LangGraph, CrewAI, AutoGen, and any other framework that builds its own LLM clients.
+
 **Anthropic:**
 ```python
+import torrix
 from anthropic import Anthropic
 
-client = torrix.wrap(Anthropic(api_key="<your-anthropic-key>"))
+torrix.init(api_key="<your-torrix-api-key>", base_url="http://localhost:8088")
+
+client = Anthropic(api_key="<your-anthropic-key>")
 
 response = client.messages.create(
     model="claude-3-5-sonnet-20241022",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
-    torrix_name="my-run",
 )
 print(response.content[0].text)
 ```
@@ -51,6 +58,16 @@ stream = client.chat.completions.create(
 for chunk in stream:
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
+
+**Explicit wrapping (optional):**
+
+If you prefer the explicit pattern, `torrix.wrap()` still works. After `torrix.init()`, calling `torrix.wrap(client)` returns the original client unchanged so there is no double-tracing.
+
+```python
+client = torrix.wrap(OpenAI(api_key="<your-openai-key>"))
+```
+
+See [Auto-Instrumentation](./auto-instrumentation.md) for more details.
 
 ---
 

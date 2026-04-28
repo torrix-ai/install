@@ -514,7 +514,7 @@ Community is free forever. Pro and Enterprise are coming soon.
 | Evals & regression testing | ✓ | ✓ | ✓ |
 | Model cost comparison | ✓ | ✓ | ✓ |
 | Prompt version control | No | Coming soon | Coming soon |
-| Prompt playground | No | Coming soon | Coming soon |
+| Prompt playground | 10 runs free | Unlimited | Unlimited |
 | Scheduled cost reports | No | Coming soon | Coming soon |
 | SSO (SAML / Okta) | No | No | Coming soon |
 | PII detection & masking | No | No | Coming soon |

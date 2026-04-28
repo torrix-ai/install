@@ -142,7 +142,7 @@ Custom criteria example: "The response should be concise and under 100 words. Pe
 
 Click **Export CSV** on the Runs page to download all currently filtered runs. The file includes: run ID, name, provider, model, status, input tokens, output tokens, cost, latency, finish reason, source, score, score note, and timestamp.
 
-Apply filters first to export a specific subset — for example, only good runs from a specific model.
+Apply filters first to export a specific subset, for example, only good runs from a specific model.
 
 ---
 

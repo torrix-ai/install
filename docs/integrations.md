@@ -10,7 +10,7 @@ Send LLM calls to Torrix using the Python SDK, Node.js SDK, or HTTP proxy. The p
 pip install torrix
 ```
 
-Call `torrix.init()` once — Torrix automatically traces every OpenAI and Anthropic call in your process, including calls made by agent frameworks that create their own clients internally.
+Call `torrix.init()` once. Torrix automatically traces every OpenAI and Anthropic call in your process, including calls made by agent frameworks that create their own clients internally.
 
 **Auto-instrumentation (recommended):**
 ```python
@@ -19,7 +19,7 @@ from openai import OpenAI
 
 torrix.init(api_key="<your-torrix-api-key>", base_url="http://localhost:8088")
 
-# No torrix.wrap() needed — all clients are traced automatically
+# No torrix.wrap() needed. All clients are traced automatically
 client = OpenAI(api_key="<your-openai-key>")
 
 response = client.chat.completions.create(

@@ -1,6 +1,6 @@
 # Auto-Instrumentation
 
-Torrix v0.2.0 adds zero-config auto-instrumentation for the Python SDK. One `torrix.init()` call patches the OpenAI and Anthropic libraries at the module level so every LLM call made anywhere in your process is traced automatically — including calls made by agent frameworks that create their own clients internally.
+Torrix v0.2.0 adds zero-config auto-instrumentation for the Python SDK. One `torrix.init()` call patches the OpenAI and Anthropic libraries at the module level so every LLM call made anywhere in your process is traced automatically, including calls made by agent frameworks that create their own clients internally.
 
 ## Why this matters
 
@@ -42,7 +42,7 @@ If `openai` or `anthropic` are not installed, `torrix.init()` completes without 
 If you call `torrix.wrap(client)` after `torrix.init()`, it returns the original client unchanged to avoid double-tracing. Both patterns are safe to use together.
 
 ```python
-# After torrix.init(), wrap() is a no-op — safe to call but not required
+# After torrix.init(), wrap() is a no-op (safe to call but not required)
 wrapped = torrix.wrap(client)  # returns client unchanged
 ```
 
@@ -55,7 +55,7 @@ from openai import OpenAI
 torrix.init(api_key="trxk_...", base_url="http://localhost:8088")
 
 def agent_node(state):
-    # This client is created inside the node — auto-instrumentation captures it
+    # This client is created inside the node. Auto-instrumentation captures it.
     client = OpenAI(api_key="sk-...")
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -66,5 +66,5 @@ def agent_node(state):
 
 ## Version history
 
-- `0.2.0` — added `torrix.init()` auto-instrumentation via module-level monkey-patching
-- `0.1.0` — explicit `torrix.wrap()` pattern for OpenAI and Anthropic clients
+- `0.2.0`: added `torrix.init()` auto-instrumentation via module-level monkey-patching
+- `0.1.0`: explicit `torrix.wrap()` pattern for OpenAI and Anthropic clients

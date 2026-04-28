@@ -46,8 +46,8 @@ scrape_configs:
 
 Once Prometheus is scraping, create a Grafana dashboard using the `torrix_*` metrics. Useful panels:
 
-- `torrix_requests_total` — total request count over time
-- `torrix_cost_usd_total` — cumulative spend
-- `torrix_errors_total` — error rate
-- `torrix_latency_p50_ms` / `p95` / `p99` — latency percentiles
-- `torrix_requests_by_model` — breakdown by model
+- `torrix_requests_total`: total request count over time
+- `torrix_cost_usd_total`: cumulative spend
+- `torrix_errors_total`: error rate
+- `torrix_latency_p50_ms` / `p95` / `p99`: latency percentiles
+- `torrix_requests_by_model`: breakdown by model

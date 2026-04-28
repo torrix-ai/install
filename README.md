@@ -110,7 +110,7 @@ Then open [http://localhost:8088](http://localhost:8088). The run should appear 
 pip install torrix
 ```
 
-Call `torrix.init()` once — Torrix automatically traces every OpenAI and Anthropic call in your process, including calls made inside LangGraph, CrewAI, AutoGen, and any other agent framework.
+Call `torrix.init()` once. Torrix automatically traces every OpenAI and Anthropic call in your process, including calls made inside LangGraph, CrewAI, AutoGen, and any other agent framework.
 
 **OpenAI:**
 ```python
@@ -119,7 +119,7 @@ from openai import OpenAI
 
 torrix.init(api_key="<your-torrix-api-key>", base_url="http://localhost:8088")
 
-# No torrix.wrap() needed — all clients traced automatically
+# No torrix.wrap() needed. All clients traced automatically
 client = OpenAI(api_key="<your-openai-key>")
 
 response = client.chat.completions.create(

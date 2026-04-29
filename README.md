@@ -465,6 +465,20 @@ Rules are managed via the Settings page (Pro only) or the REST API:
 - `POST /api/routing-rules`
 - `DELETE /api/routing-rules/:id`
 
+### Custom model pricing (Pro)
+
+Set per-token pricing for fine-tuned or private models that are not in Torrix's built-in price list. Without custom pricing, runs using unknown models show $0.00 cost, which breaks budget alerts and the cost dashboard.
+
+In Settings, add an entry with the exact model name and the input and output rates in USD per 1M tokens:
+
+| Field | Example | Description |
+|---|---|---|
+| Model name | `my-finetuned-gpt4o` | Must match the model field sent in your requests exactly |
+| Input USD / 1M tokens | `5.00` | What you pay per 1M tokens sent to the model |
+| Output USD / 1M tokens | `15.00` | What you pay per 1M tokens the model generates |
+
+Once saved, all future runs using that model name show accurate cost figures. Built-in models (GPT-4o, Claude, Gemini, etc.) are unaffected and continue using Torrix's maintained price list.
+
 ### OpenTelemetry receiver
 
 Torrix accepts OTLP/HTTP (JSON) traces at `POST /v1/traces`. Any application already instrumented with the OpenTelemetry SDK can send LLM spans to Torrix with no additional code changes.
@@ -552,6 +566,7 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Model cost comparison | ✓ | ✓ | ✓ |
 | Scheduled cost reports | No | ✓ | ✓ |
 | Model routing rules | No | ✓ | ✓ |
+| Custom model pricing | No | ✓ | ✓ |
 | Prompt version control | No | Coming soon | Coming soon |
 | Prompt playground | 10 runs free | Unlimited | Unlimited |
 | SSO (SAML / Okta) | No | No | Coming soon |

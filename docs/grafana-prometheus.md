@@ -51,3 +51,9 @@ Once Prometheus is scraping, create a Grafana dashboard using the `torrix_*` met
 - `torrix_errors_total`: error rate
 - `torrix_latency_p50_ms` / `p95` / `p99`: latency percentiles
 - `torrix_requests_by_model`: breakdown by model
+
+---
+
+## Rate limiting metrics
+
+Torrix also enforces per-IP rate limits (300 req/min global, 10 req/min on auth, 120-300 req/min on proxy/ingest depending on edition). Rate-limited requests return HTTP 429 with `x-ratelimit-reset` indicating when the client can retry. Monitor `torrix_errors_total` for spikes that may indicate rate limit hits from misconfigured clients.

@@ -113,7 +113,7 @@ console.log(response.content[0].text)
 
 ## HTTP Proxy
 
-Route any HTTP request through Torrix by pointing it at `/proxy`. Works with Google Gemini, Azure OpenAI, Groq, Mistral, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
+Route any HTTP request through Torrix by pointing it at `/proxy`. Works with Google Gemini, Azure OpenAI, Groq, Mistral, DeepSeek, Kimi K2, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, NVIDIA NIM, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
 
 ```bash
 curl -X POST http://localhost:8088/proxy \

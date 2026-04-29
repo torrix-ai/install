@@ -157,3 +157,31 @@ Captures chain-of-thought reasoning tokens from models that expose them:
 - Ollama Qwen3
 
 Reasoning steps appear in the Event Timeline on the run detail page alongside the final response. Reasoning tokens are tracked separately where the model reports them, so you can see the true cost of extended thinking.
+
+---
+
+## Full-text search (Pro)
+
+Search across all prompts and responses with SQLite FTS5. Type any keyword or phrase into the Deep Search bar on the Runs page and get instant results with highlighted snippets. Useful for finding a specific conversation across thousands of runs.
+
+Requires a Pro license. Community edition uses client-side filtering by name, ID, and trace ID.
+
+---
+
+## Rate limiting
+
+Built-in per-IP rate limiting protects your instance:
+
+| Endpoint | Limit |
+|---|---|
+| `/auth/*` | 10 req/min |
+| `/proxy`, `/api/ingest` | 120 req/min (Community), 300 req/min (Pro) |
+| All other routes | 300 req/min |
+
+Response headers `x-ratelimit-limit`, `x-ratelimit-remaining`, and `x-ratelimit-reset` are included on every response.
+
+---
+
+## Token distribution breakdown
+
+The run detail page shows a visual breakdown of token usage as a horizontal stacked bar: input tokens (blue), output tokens (green), and thinking tokens (purple, when present). Quickly see how much of a request's cost went to reasoning vs. the final response.

@@ -95,3 +95,7 @@ Change the ticket in **Set Ticket** to a billing or feature request and run agai
 Set the model on the **Bug Response** node to a more expensive model and run again. Compare the cost in Torrix to see the difference immediately.
 
 Add a third Torrix Proxy node to the workflow for a follow-up action and give it the same trace ID. Torrix will include it in the same trace automatically.
+
+## Supported models
+
+This demo works with any model supported by the proxy: GPT-4o, GPT-4.1, Claude Sonnet 4, Gemini 2.5, DeepSeek R1, Kimi K2, Llama 4, and any other OpenAI-compatible endpoint. Change the model in the Torrix Proxy node settings or in your n8n credential configuration.

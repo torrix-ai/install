@@ -432,6 +432,31 @@ Configure the webhook URL in Settings. Slack webhook URLs (`https://hooks.slack.
 
 See [docs/webhooks.md](docs/webhooks.md) for payload shapes and PagerDuty setup.
 
+### Weekly cost digest (Pro)
+
+Enable a weekly cost summary webhook that fires every 7 days with:
+
+- Total spend for the period
+- Total runs and error count
+- Top 5 models by cost
+- Week-over-week comparison (cost and run count change %)
+
+The digest reuses your existing webhook URL from Budget Controls. Slack webhook URLs receive a native Block Kit message. Toggle it on in Settings with a single checkbox. See [docs/webhooks.md](docs/webhooks.md) for the full payload format.
+
+### Model routing rules (Pro)
+
+Auto-rewrite the `model` field in proxy requests before they reach the upstream provider. Create rules in Settings like "swap `gpt-4o` to `gpt-4o-mini`" to optimize cost without changing any application code.
+
+When a rule matches:
+- The request is forwarded with the rewritten model name
+- The response includes an `x-torrix-routed-from` header showing the original model
+- The run detail page displays a "Routed from" badge for audit
+
+Rules are managed via the Settings page (Pro only) or the REST API:
+- `GET /api/routing-rules`
+- `POST /api/routing-rules`
+- `DELETE /api/routing-rules/:id`
+
 ### OpenTelemetry receiver
 
 Torrix accepts OTLP/HTTP (JSON) traces at `POST /v1/traces`. Any application already instrumented with the OpenTelemetry SDK can send LLM spans to Torrix with no additional code changes.
@@ -503,7 +528,7 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 
 ## Editions
 
-Community is free forever. Pro and Enterprise are coming soon.
+Community is free forever. Pro is live at founding-member pricing. Enterprise is coming soon.
 
 | Feature | Community | Pro | Enterprise |
 |---|---|---|---|
@@ -513,16 +538,17 @@ Community is free forever. Pro and Enterprise are coming soon.
 | Budget alerts | ✓ | ✓ | ✓ |
 | Evals & regression testing | ✓ | ✓ | ✓ |
 | Model cost comparison | ✓ | ✓ | ✓ |
+| Scheduled cost reports | No | ✓ | ✓ |
+| Model routing rules | No | ✓ | ✓ |
 | Prompt version control | No | Coming soon | Coming soon |
 | Prompt playground | 10 runs free | Unlimited | Unlimited |
-| Scheduled cost reports | No | Coming soon | Coming soon |
 | SSO (SAML / Okta) | No | No | Coming soon |
 | PII detection & masking | No | No | Coming soon |
 | Audit log export | No | No | Coming soon |
 | Helm chart (Kubernetes) | No | No | Coming soon |
 | Support | Community | Priority | Dedicated |
 
-Pro and Enterprise are coming soon at [torrix.ai](https://torrix.ai)
+Get Pro at [torrix.ai](https://torrix.ai)
 
 ---
 

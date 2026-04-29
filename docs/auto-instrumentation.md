@@ -68,7 +68,3 @@ def agent_node(state):
 
 - `0.2.0`: added `torrix.init()` auto-instrumentation via module-level monkey-patching
 - `0.1.0`: explicit `torrix.wrap()` pattern for OpenAI and Anthropic clients
-
-## Supported models
-
-Auto-instrumentation captures calls to any model available through the OpenAI or Anthropic SDKs, including GPT-4.1, GPT-4o, o3, o4-mini, Claude Opus 4, Claude Sonnet 4, and all prior generations. Token counts, cost, and latency are extracted from the API response automatically.

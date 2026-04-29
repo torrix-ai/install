@@ -1,6 +1,6 @@
 # Outbound Webhooks
 
-Torrix can fire HTTP webhooks on two events: budget threshold breaches and LLM request errors.
+Torrix can fire HTTP webhooks on three events: budget threshold breaches, LLM request errors, and weekly cost digests.
 
 ## Setup
 
@@ -9,6 +9,7 @@ Go to **Settings > Budget Controls** and fill in:
 - **Webhook URL**: any `https://` POST endpoint
 - **Enable budget alert webhook**: fires when your daily spend crosses the threshold
 - **Also fire webhook on LLM request errors**: fires on any upstream HTTP 4xx or 5xx
+- **Send weekly cost digest**: fires every 7 days with a full cost summary (Pro only)
 
 ## Slack
 
@@ -41,51 +42,39 @@ Webhook URLs starting with `https://hooks.slack.com/` are automatically formatte
 }
 ```
 
-## Verifying webhook signatures (HMAC)
+### Weekly cost digest (Pro)
 
-Every outbound webhook includes an `x-torrix-signature` header containing an HMAC-SHA256 signature of the request body. This lets you confirm the webhook genuinely came from your Torrix instance and was not forged by a third party.
-
-**Header format:** `x-torrix-signature: sha256=<hex>`
-
-**Your signing secret** is available via the API:
-
-```bash
-curl -s http://localhost:8088/api/alert-settings \
-  -H "Authorization: Bearer trxk_YOUR_KEY" | jq .webhook_secret
-```
-
-**Verification example (Node.js):**
-
-```javascript
-const crypto = require('crypto');
-
-function verifySignature(rawBody, signature, secret) {
-  const expected = 'sha256=' + crypto
-    .createHmac('sha256', secret)
-    .update(rawBody)
-    .digest('hex');
-  return signature === expected;
+```json
+{
+  "event": "weekly_digest",
+  "period_start": "2026-04-22T00:00:00.000Z",
+  "period_end": "2026-04-29T00:00:00.000Z",
+  "total_cost_usd": 12.45,
+  "total_runs": 342,
+  "error_count": 5,
+  "error_rate_pct": 1.46,
+  "top_models": [
+    { "model": "gpt-4o", "cost_usd": 8.20, "runs": 180 },
+    { "model": "gpt-4o-mini", "cost_usd": 2.10, "runs": 120 }
+  ],
+  "vs_prior_week": {
+    "cost_change_pct": 15.2,
+    "runs_change_pct": 8.0
+  }
 }
-
-// In your webhook handler:
-const isValid = verifySignature(req.body, req.headers['x-torrix-signature'], YOUR_SECRET);
-if (!isValid) return res.status(401).send('Invalid signature');
 ```
-
-**Verification example (bash):**
-
-```bash
-echo -n "$BODY" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET"
-```
-
-The secret is generated automatically on first webhook send and persists across restarts. It is unique to your Torrix instance.
 
 ## PagerDuty
 
-To route Torrix alerts to PagerDuty, set up a Generic Webhook integration in your PagerDuty service and paste the endpoint URL into the Torrix webhook field. Use the `run.error` or `budget_exceeded` event field to write routing rules in PagerDuty.
+To route Torrix alerts to PagerDuty, set up a Generic Webhook integration in your PagerDuty service and paste the endpoint URL into the Torrix webhook field. Use the `run.error`, `budget_exceeded`, or `weekly_digest` event field to write routing rules in PagerDuty.
 
 ## Notes
 
 - Webhook failures are silent. Torrix does not retry or log failed deliveries.
 - Budget alerts fire at most once per day per user to avoid alert fatigue.
 - Error alerts fire on every request that returns HTTP 4xx or 5xx from the upstream LLM provider.
+- Weekly digests fire every 7 days. Torrix checks hourly and fires if 7+ days have passed since the last digest.
+
+## Security
+
+All webhook payloads include a `x-torrix-signature` header containing an HMAC-SHA256 signature of the request body, keyed with your Torrix API key. Verify the signature on your receiving endpoint to ensure authenticity.

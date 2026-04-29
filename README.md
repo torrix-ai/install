@@ -374,6 +374,14 @@ curl -X POST http://localhost:8088/proxy \
 
 Runs appear with a **session** badge showing the turn count. Click it to see the full conversation with combined cost and tokens.
 
+### Session conversation view
+
+The session detail page shows a turn-by-turn timeline built for reviewing multi-turn conversations at a glance:
+
+- **Prompt preview** shows the last user message for each turn directly in the timeline card, so you can follow the conversation without clicking into each run
+- **Cost by model** shows a horizontal breakdown when 2 or more models are used across turns, with cost and percentage per model
+- **Dynamic title** derives the session title from the first run name instead of always showing "Conversation Session"
+
 ### Real-time cost tracking
 Every API call is logged with token counts, model, cost, and latency. See exactly what you're spending as it happens.
 
@@ -523,6 +531,10 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 **Batch scoring:** On the Runs page, use the **Batch auto-score** panel to score multiple runs at once with one click. Saves your judge settings across sessions.
 
 **Filtering and export:** Use the Score filter on the Runs page to show only good, bad, or unscored runs. Export to CSV to build a labelled dataset for offline eval pipelines. The CSV includes `score` and `score_note` columns.
+
+### Run notes
+
+Add a free-text note to any run, independent of its score. The note field is always visible on the run detail page and saves automatically when you click away. Notes persist across reloads and appear as a chip in the runs list so annotated runs are easy to find at a glance. Useful for capturing debugging context, prompt change reasoning, or review observations.
 
 ---
 

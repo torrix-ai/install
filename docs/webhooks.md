@@ -41,6 +41,45 @@ Webhook URLs starting with `https://hooks.slack.com/` are automatically formatte
 }
 ```
 
+## Verifying webhook signatures (HMAC)
+
+Every outbound webhook includes an `x-torrix-signature` header containing an HMAC-SHA256 signature of the request body. This lets you confirm the webhook genuinely came from your Torrix instance and was not forged by a third party.
+
+**Header format:** `x-torrix-signature: sha256=<hex>`
+
+**Your signing secret** is available via the API:
+
+```bash
+curl -s http://localhost:8088/api/alert-settings \
+  -H "Authorization: Bearer trxk_YOUR_KEY" | jq .webhook_secret
+```
+
+**Verification example (Node.js):**
+
+```javascript
+const crypto = require('crypto');
+
+function verifySignature(rawBody, signature, secret) {
+  const expected = 'sha256=' + crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex');
+  return signature === expected;
+}
+
+// In your webhook handler:
+const isValid = verifySignature(req.body, req.headers['x-torrix-signature'], YOUR_SECRET);
+if (!isValid) return res.status(401).send('Invalid signature');
+```
+
+**Verification example (bash):**
+
+```bash
+echo -n "$BODY" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET"
+```
+
+The secret is generated automatically on first webhook send and persists across restarts. It is unique to your Torrix instance.
+
 ## PagerDuty
 
 To route Torrix alerts to PagerDuty, set up a Generic Webhook integration in your PagerDuty service and paste the endpoint URL into the Torrix webhook field. Use the `run.error` or `budget_exceeded` event field to write routing rules in PagerDuty.

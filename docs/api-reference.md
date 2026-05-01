@@ -21,6 +21,7 @@ Forward LLM requests through Torrix for automatic logging.
 | `x-torrix-name` | No | Human-readable name for this run |
 | `x-torrix-trace` | No | Trace ID for grouping related runs |
 | `x-torrix-session` | No | Session ID for conversation grouping |
+| `x-agent-name` | No | Agent name for cost grouping (e.g. `classifier`, `summarizer`) |
 
 **Body:** Pass the upstream request body as-is (JSON).
 
@@ -95,6 +96,38 @@ Aggregated stats for the dashboard.
   "providers": [{ "provider": "openai", "count": 200 }],
   "hourly": [{ "hour": "2024-01-15T10:00:00Z", "count": 12, "cost": 0.15 }]
 }
+```
+
+---
+
+## Agents
+
+### GET /api/agents/costs
+
+Per-agent cost breakdown across all runs.
+
+**Response:**
+```json
+[
+  { "agent_name": "classifier", "requests": 45, "cost": 0.0123, "tokens": 18400 },
+  { "agent_name": "summarizer", "requests": 12, "cost": 0.0034, "tokens": 5200 },
+  { "agent_name": "untagged",   "requests": 300, "cost": 0.12,  "tokens": 89000 }
+]
+```
+
+---
+
+## Insights
+
+### GET /api/insights/caching
+
+Repeated prompts detected in the last 24 hours (3+ occurrences).
+
+**Response:**
+```json
+[
+  { "prompt_hash": "a1b2c3d4e5f6a7b8", "count": 7, "total_cost": 0.0042, "sample_name": "classify-ticket" }
+]
 ```
 
 ---

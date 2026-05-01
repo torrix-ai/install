@@ -206,3 +206,47 @@ Torrix automatically detects when a request uses JSON mode or tool calling and r
 | **TOOL** | Amber | Tool-calling request |
 
 No configuration is required. Detection is automatic for all requests through the proxy and the SDK ingest endpoint.
+
+---
+
+## Agent tagging and cost grouping
+
+Tag any run with an agent name to group costs by agent across your system.
+
+**Via proxy header:**
+
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-agent-name: classifier" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Classify this…"}]}'
+```
+
+**Via SDK ingest payload:**
+
+```json
+{ "agent_name": "summarizer", "prompt": "...", "response": "..." }
+```
+
+Once tagged, the run shows a purple agent chip in the runs list. The Analytics dashboard shows a **By Agent** table with per-agent request counts, token totals, and cost. The runs page filter lets you show only runs for a specific agent.
+
+---
+
+## Long prompt detection
+
+Torrix computes the p95 of input tokens per model from the loaded runs. Any run where `input_tokens` exceeds that threshold shows an amber **LONG** badge. Useful for spotting bloated system prompts or unexpectedly large context windows before they inflate your bill. No configuration required.
+
+---
+
+## Model optimization hints
+
+When a premium model (`claude-opus-*` or `gpt-4o`) is used with fewer than 500 input tokens, the run detail page shows an amber hint suggesting a cheaper alternative such as `gpt-4o-mini` or `claude-haiku-4-5-20251001`. Purely informational, shown only when the cost savings would be meaningful.
+
+---
+
+## Repeated prompt detection and caching hints
+
+Torrix stores a SHA-256 hash of the first 500 characters of every prompt. If the same prompt appears three or more times within 24 hours, the **Caching opportunities** card appears on the Analytics dashboard, listing the repeated prompts with their repeat count and total cost. Use this to identify candidates for prompt caching.

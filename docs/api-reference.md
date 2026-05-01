@@ -60,13 +60,17 @@ Receive telemetry from SDKs (Python, TypeScript).
   "request_bytes": 512,
   "response_bytes": 1024,
   "prompt": "What is...",
-  "response": "The answer is...",
+  "response": "{\"answer\": \"42\"}",
   "summary": "HTTP 200 · 1200ms · model: gpt-4o",
   "source": "sdk",
   "trace_id": "optional-trace",
-  "session_id": "optional-session"
+  "session_id": "optional-session",
+  "response_format": {"type": "json_object"},
+  "tools": []
 }
 ```
+
+**Structured output auto-detection:** If the body includes `response_format` with type `json_object` or `json_schema`, Torrix sets `structured_output = "json"` and checks whether the response text is valid JSON, storing the result in `json_parse_ok` (1 = valid, 0 = failed parse). If `tools` is a non-empty array, `structured_output = "tools"`. Both fields are stored on the run and shown as badges in the runs list. Detection is automatic and the fields are optional in the ingest payload.
 
 **Response:** `{ "ok": true, "run_id": "..." }`
 

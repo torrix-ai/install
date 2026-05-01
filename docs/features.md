@@ -185,3 +185,24 @@ Response headers `x-ratelimit-limit`, `x-ratelimit-remaining`, and `x-ratelimit-
 ## Token distribution breakdown
 
 The run detail page shows a visual breakdown of token usage as a horizontal stacked bar: input tokens (blue), output tokens (green), and thinking tokens (purple, when present). Quickly see how much of a request's cost went to reasoning vs. the final response.
+
+---
+
+## Structured output tracking
+
+Torrix automatically detects when a request uses JSON mode or tool calling and records the result on the run.
+
+**How it works:**
+
+- If the request body contains `response_format: { "type": "json_object" }` or `response_format: { "type": "json_schema", ... }`, the run is tagged as a JSON mode request. Torrix then checks whether the response text parses as valid JSON and stores the result.
+- If the request body contains a non-empty `tools` array, the run is tagged as a tool-calling request.
+
+**What you see in the UI:**
+
+| Badge | Colour | Meaning |
+|---|---|---|
+| **JSON** | Green | JSON mode request, response is valid JSON |
+| **JSON** | Red | JSON mode request, response failed to parse as JSON |
+| **TOOL** | Amber | Tool-calling request |
+
+No configuration is required. Detection is automatic for all requests through the proxy and the SDK ingest endpoint.

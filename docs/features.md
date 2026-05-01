@@ -243,10 +243,26 @@ Torrix computes the p95 of input tokens per model from the loaded runs. Any run 
 
 ## Model optimization hints
 
-When a premium model (`claude-opus-*` or `gpt-4o`) is used with fewer than 500 input tokens, the run detail page shows an amber hint suggesting a cheaper alternative such as `gpt-4o-mini` or `claude-haiku-4-5-20251001`. Purely informational, shown only when the cost savings would be meaningful.
+When a premium model is used with fewer than 500 input tokens, the run detail page shows an amber hint suggesting a cheaper alternative. Detection is cost-based (cost per 1K tokens above a threshold) rather than a model name list, so it works automatically for OpenAI, Anthropic, Gemini, and any future provider. Purely informational, shown only when the cost saving would be meaningful.
 
 ---
 
 ## Repeated prompt detection and caching hints
 
 Torrix stores a SHA-256 hash of the first 500 characters of every prompt. If the same prompt appears three or more times within 24 hours, the **Caching opportunities** card appears on the Analytics dashboard, listing the repeated prompts with their repeat count and total cost. Use this to identify candidates for prompt caching.
+
+---
+
+## Insight filter toggles
+
+Three toggle buttons on the Runs page let you instantly narrow to runs flagged by each intelligence feature. All three work alongside the existing agent, provider, score, trace, and session filters.
+
+| Toggle | Color | What it shows |
+|---|---|---|
+| **Long prompts** | Amber | Runs where input tokens exceed the p95 threshold for that model |
+| **Optimize?** | Orange | Runs where a premium model handled fewer than 500 input tokens |
+| **Repeated** | Indigo | Runs whose prompt appeared more than once in the loaded batch |
+
+Click an active toggle to deactivate it. The **Clear** button resets all filters at once.
+
+**Combining filters:** Insight toggles stack with each other and with all other filters. For example, set the agent filter to `summarizer` and click **Long prompts** to see only the long-context runs from that specific agent.

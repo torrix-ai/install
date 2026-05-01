@@ -266,3 +266,23 @@ Three toggle buttons on the Runs page let you instantly narrow to runs flagged b
 Click an active toggle to deactivate it. The **Clear** button resets all filters at once.
 
 **Combining filters:** Insight toggles stack with each other and with all other filters. For example, set the agent filter to `summarizer` and click **Long prompts** to see only the long-context runs from that specific agent.
+
+---
+
+## Copy run ID
+
+Every run in the runs list shows its unique identifier as a small monospace chip in the badge cluster. Click the chip to copy the full UUID to your clipboard. The chip text briefly changes to "copied!" and then reverts. The run detail page includes the same chip.
+
+Useful for referencing a specific run in API calls, support requests, or debugging notes without navigating into the run detail page.
+
+---
+
+## Advanced filter layout
+
+The Runs page organises its filters into two tiers.
+
+**Always visible:** Provider, Model, Status, Date
+
+**Collapsed by default (click Filters to expand):** Agent, Source, Latency, Score, Traces only, Sessions only, Long prompts, Optimize?, Repeated
+
+When one or more advanced filters are active, a count badge appears on the Filters button so you can see at a glance how many constraints are applied. The advanced row auto-expands when you arrive on the page with a filter already set from a link or bookmark.

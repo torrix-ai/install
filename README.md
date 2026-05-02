@@ -2,6 +2,8 @@
 
 Track every LLM request: tokens, cost, latency, full prompt traces, and reasoning token capture. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
 
+> **Migrating from Helicone?** Helicone is now in maintenance mode after being acquired by Mintlify. Torrix uses the same proxy-header model. See the [5-minute migration guide](docs/migrate-from-helicone.md).
+
 ---
 
 ## Getting Started

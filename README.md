@@ -2,8 +2,6 @@
 
 Track every LLM request: tokens, cost, latency, full prompt traces, and reasoning token capture. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
 
-> **Migrating from Helicone?** Helicone is now in maintenance mode after being acquired by Mintlify. Torrix uses the same proxy-header model. See the [5-minute migration guide](docs/migrate-from-helicone.md).
-
 ---
 
 ## Getting Started
@@ -376,14 +374,6 @@ curl -X POST http://localhost:8088/proxy \
 
 Runs appear with a **session** badge showing the turn count. Click it to see the full conversation with combined cost and tokens.
 
-### Session conversation view
-
-The session detail page shows a turn-by-turn timeline built for reviewing multi-turn conversations at a glance:
-
-- **Prompt preview** shows the last user message for each turn directly in the timeline card, so you can follow the conversation without clicking into each run
-- **Cost by model** shows a horizontal breakdown when 2 or more models are used across turns, with cost and percentage per model
-- **Dynamic title** derives the session title from the first run name instead of always showing "Conversation Session"
-
 ### Real-time cost tracking
 Every API call is logged with token counts, model, cost, and latency. See exactly what you're spending as it happens.
 
@@ -424,6 +414,39 @@ curl -X POST http://localhost:8088/proxy \
 ```
 
 The value is a float between 0 and 1. `0.1` logs roughly 10% of requests. `1` logs all (the default when the header is omitted). `0` logs nothing. Errors are always logged regardless of sample rate. Useful for high-volume production deployments where you want cost and latency trends without storing every individual run.
+
+#### Global default sample rate
+
+Set a default rate for all requests at the instance level from Settings. When set, every request that does not include an `x-torrix-sample` header is sampled at the configured rate. Per-request headers always override the global setting.
+
+### Structured JSON export
+
+Export your full run history from the Runs page. Two formats are available:
+
+- **CSV**: comma-separated with all fields, compatible with spreadsheets and most analytics tools
+- **JSON**: full-fidelity export including model, provider, input and output tokens, cost, latency, prompt body, response text, finish reason, trace ID, session ID, and project
+
+The export button is in the Runs page toolbar. Both formats respect any active filters and project scope, so you can export exactly the subset of data you need.
+
+### Multi-project namespaces
+
+Organize runs into named projects to separate workloads and filter observability data by scope.
+
+Tag a request with a project name at send time:
+
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-project: my-chatbot" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+The header accepts either the project name or its UUID. If no project with that name exists yet, create one from the project selector in the sidebar.
+
+Switch the active project from any page (Home, Analytics, Runs, Evals) to scope all displayed data to that project. Selecting "All projects" restores the aggregate view across all projects.
 
 ### Tool call tracing
 
@@ -466,20 +489,6 @@ Rules are managed via the Settings page (Pro only) or the REST API:
 - `GET /api/routing-rules`
 - `POST /api/routing-rules`
 - `DELETE /api/routing-rules/:id`
-
-### Custom model pricing (Pro)
-
-Set per-token pricing for fine-tuned or private models that are not in Torrix's built-in price list. Without custom pricing, runs using unknown models show $0.00 cost, which breaks budget alerts and the cost dashboard.
-
-In Settings, add an entry with the exact model name and the input and output rates in USD per 1M tokens:
-
-| Field | Example | Description |
-|---|---|---|
-| Model name | `my-finetuned-gpt4o` | Must match the model field sent in your requests exactly |
-| Input USD / 1M tokens | `5.00` | What you pay per 1M tokens sent to the model |
-| Output USD / 1M tokens | `15.00` | What you pay per 1M tokens the model generates |
-
-Once saved, all future runs using that model name show accurate cost figures. Built-in models (GPT-4o, Claude, Gemini, etc.) are unaffected and continue using Torrix's maintained price list.
 
 ### OpenTelemetry receiver
 
@@ -548,10 +557,6 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 
 **Filtering and export:** Use the Score filter on the Runs page to show only good, bad, or unscored runs. Export to CSV to build a labelled dataset for offline eval pipelines. The CSV includes `score` and `score_note` columns.
 
-### Run notes
-
-Add a free-text note to any run, independent of its score. The note field is always visible on the run detail page and saves automatically when you click away. Notes persist across reloads and appear as a chip in the runs list so annotated runs are easy to find at a glance. Useful for capturing debugging context, prompt change reasoning, or review observations.
-
 ---
 
 ## Editions
@@ -568,7 +573,6 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Model cost comparison | ✓ | ✓ | ✓ |
 | Scheduled cost reports | No | ✓ | ✓ |
 | Model routing rules | No | ✓ | ✓ |
-| Custom model pricing | No | ✓ | ✓ |
 | Prompt version control | No | Coming soon | Coming soon |
 | Prompt playground | 10 runs free | Unlimited | Unlimited |
 | SSO (SAML / Okta) | No | No | Coming soon |

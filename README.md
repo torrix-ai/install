@@ -557,6 +557,18 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 
 **Filtering and export:** Use the Score filter on the Runs page to show only good, bad, or unscored runs. Export to CSV to build a labelled dataset for offline eval pipelines. The CSV includes `score` and `score_note` columns.
 
+### Team management (Pro)
+
+Invite team members with per-project roles: Owner, Editor, or Viewer. The instance admin creates accounts directly from the Team page (no email server needed). Each member sees only the projects they have access to.
+
+- **Owner**: manage project members, delete project, plus all Editor permissions
+- **Editor**: create runs via proxy/SDK, score runs, add notes
+- **Viewer**: read-only access to dashboard, analytics, and runs
+
+New users are prompted to change their temporary password on first login.
+
+See [docs/team-management.md](docs/team-management.md) for the full API reference.
+
 ---
 
 ## Editions
@@ -566,6 +578,7 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Feature | Community | Pro | Enterprise |
 |---|---|---|---|
 | Users | 1 | Up to 10 | Unlimited |
+| Team management (RBAC) | No | ✓ | ✓ |
 | Data retention | 7 days | 30 days | 90 days |
 | Runs shown | 100 most recent | Unlimited | Unlimited |
 | Budget alerts | ✓ | ✓ | ✓ |

@@ -557,17 +557,79 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 
 **Filtering and export:** Use the Score filter on the Runs page to show only good, bad, or unscored runs. Export to CSV to build a labelled dataset for offline eval pipelines. The CSV includes `score` and `score_note` columns.
 
-### Team management (Pro)
+### Custom run tags
 
-Invite team members with per-project roles: Owner, Editor, or Viewer. The instance admin creates accounts directly from the Team page (no email server needed). Each member sees only the projects they have access to.
+Attach arbitrary key-value metadata to any LLM call. Tags appear as color chips in the Runs table and are filterable.
 
-- **Owner**: manage project members, delete project, plus all Editor permissions
-- **Editor**: create runs via proxy/SDK, score runs, add notes
-- **Viewer**: read-only access to dashboard, analytics, and runs
+**Via the proxy header:**
 
-New users are prompted to change their temporary password on first login.
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-tags: env=prod,team=backend,feature=summarizer" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Summarize this article..."}]}'
+```
 
-See [docs/team-management.md](docs/team-management.md) for the full API reference.
+**Via the Python SDK:**
+
+```python
+import torrix
+import openai
+
+torrix.init(api_key="trxk_...", base_url="http://localhost:8088")
+client = torrix.wrap(openai.OpenAI(api_key="sk-..."))
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}],
+    extra_headers={"x-torrix-tags": "env=prod,team=backend"}
+)
+```
+
+Tags use a comma-separated `key=value` format. Any key or value is accepted. Use the tag filter on the Runs page to narrow runs by any tag key or value.
+
+### Prompt management and versioning
+
+Create named prompts with a system prompt and user template, publish versions, and test directly in the Playground.
+
+**Creating a prompt:**
+
+1. Go to **Prompts** in the sidebar.
+2. Click **New Prompt**.
+3. Enter a name, an optional description, and optionally a system prompt and user template.
+4. Click **Create**. If you entered prompt content, version 1 is created and set as active automatically.
+
+**Adding versions:**
+
+Click **Add version** on any prompt to save a new revision with updated content. Each version is numbered sequentially. Mark any version as active to make it the production version.
+
+**Testing in the Playground:**
+
+Use the **Load from Prompt Library** dropdown in the Playground to fill the system and user fields from the active version of any prompt. After editing, click **Save as prompt** to save your changes as a new version.
+
+**API:**
+
+```bash
+# List all prompts
+GET /api/prompts
+
+# Create a prompt
+POST /api/prompts
+{"name": "Support reply", "description": "Customer support tone"}
+
+# Add a version
+POST /api/prompts/:id/versions
+{"system_prompt": "You are a support agent.", "user_prompt_template": "Reply to: {{message}}"}
+
+# Set a version active
+PUT /api/prompts/:id/versions/:vid/activate
+
+# Get the active version
+GET /api/prompts/:id/active
+```
 
 ---
 
@@ -578,7 +640,6 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Feature | Community | Pro | Enterprise |
 |---|---|---|---|
 | Users | 1 | Up to 10 | Unlimited |
-| Team management (RBAC) | No | ✓ | ✓ |
 | Data retention | 7 days | 30 days | 90 days |
 | Runs shown | 100 most recent | Unlimited | Unlimited |
 | Budget alerts | ✓ | ✓ | ✓ |

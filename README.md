@@ -633,6 +633,41 @@ GET /api/prompts/:id/active
 
 ---
 
+### Agent trace tree
+
+When multiple LLM calls share a trace ID, Torrix groups them on `/ui/traces/:traceId`. If parent-child span relationships are captured, the page renders a collapsible nested tree instead of a flat Gantt timeline.
+
+**Via OTLP (automatic):** Spans sent to `POST /v1/traces` are linked automatically using the standard `parentSpanId` field. No extra configuration needed.
+
+**Via the proxy:** Pass the parent run ID in a header:
+
+```bash
+# First call becomes the parent
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <openai-key>" \
+  -H "x-torrix-trace: my-trace-id" \
+  -H "x-torrix-name: Orchestrator" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Plan the task"}]}'
+
+# Second call is a child of the first (use the run ID from the dashboard or x-run-id response header)
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <openai-key>" \
+  -H "x-torrix-trace: my-trace-id" \
+  -H "x-torrix-parent-run-id: <parent-run-id>" \
+  -H "x-torrix-name: Tool: summarize" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Summarize this"}]}'
+```
+
+Open `/ui/traces/my-trace-id` to see the tree. Use the **Tree / Flat** toggle to switch views. Traces with no parent data fall back to the flat timeline automatically.
+
+---
+
 ## Editions
 
 Community is free forever. Pro is live at founding-member pricing. Enterprise is coming soon.

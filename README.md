@@ -448,6 +448,32 @@ The header accepts either the project name or its UUID. If no project with that 
 
 Switch the active project from any page (Home, Analytics, Runs, Evals) to scope all displayed data to that project. Selecting "All projects" restores the aggregate view across all projects.
 
+### Multimodal trace support
+
+Image content sent through the proxy is automatically captured in run traces. URL images appear as inline thumbnails in the run detail panel. Base64 images show as compact size badges with the MIME type and approximate byte size.
+
+Send image content using the standard provider format:
+
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "Describe this image."},
+        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
+      ]
+    }]
+  }'
+```
+
+No extra headers or configuration are needed. Torrix detects multimodal content blocks in OpenAI, Anthropic, and Gemini request formats and renders them in the run detail panel automatically.
+
 ### Tool call tracing
 
 Every tool call made by an agent is automatically captured as a separate event in the run trace. Works with OpenAI function calling, Anthropic tool use, and Gemini function calling. Open any run detail page and the Event Timeline shows each tool that fired, with its name and arguments.
@@ -484,6 +510,18 @@ When a rule matches:
 - The request is forwarded with the rewritten model name
 - The response includes an `x-torrix-routed-from` header showing the original model
 - The run detail page displays a "Routed from" badge for audit
+
+**Fallback model:** Each routing rule accepts an optional fallback model. If the primary model returns a 404 (model not found), 429 (rate limited), or any 5xx server error, the proxy automatically retries the request with the fallback model before returning to the caller. Runs that triggered the fallback are marked with an amber badge in the Runs table. No application code changes are needed.
+
+```bash
+# gpt-4o → sent to nonexistent-model → 404 → retried as gpt-3.5-turbo automatically
+curl http://localhost:8088/proxy \
+  -H "Authorization: Bearer <torrix-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <openai-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"nonexistent-model","messages":[{"role":"user","content":"hello"}]}'
+```
 
 Rules are managed via the Settings page (Pro only) or the REST API:
 - `GET /api/routing-rules`
@@ -523,6 +561,18 @@ See [docs/otel.md](docs/otel.md) for the full attribute mapping table and a Pyth
 
 The home dashboard shows a projected month-end spend figure beneath the budget status bar. Torrix calculates your average daily cost from the current month's runs and extrapolates it to the end of the month. The forecast is color-coded: green when on track, amber when approaching your budget, and red when the projection exceeds it. No extra configuration is needed beyond setting a budget in Settings.
 
+### Per-project and per-key budget limits
+
+In addition to the global daily cap, you can set a daily spending limit scoped to an individual project or API key. Go to **Settings > Budget and Sampling** and use the Per-project and Per-key Limits card to add a cap. Select a project or API key from the dropdown, enter the daily limit in USD, then click Add.
+
+When a proxy request arrives with `x-torrix-project: <name>` and that project has already reached its daily cap, Torrix returns a 429 before making the upstream call:
+
+```json
+{"error": "Project budget cap exceeded", "detail": "Daily cap of $0.50 reached for this project."}
+```
+
+Per-key limits work the same way using the API key that authenticates the request. The global hard cap and per-scope limits are checked independently, so whichever limit is reached first takes effect.
+
 ### Streaming instrumentation
 
 Streaming responses (requests sent with `"stream": true` or `Accept: text/event-stream`) are fully instrumented with no added latency. Torrix accumulates SSE chunks while piping them to your client in real time. When the stream closes, each run is backfilled with:
@@ -557,17 +607,163 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 
 **Filtering and export:** Use the Score filter on the Runs page to show only good, bad, or unscored runs. Export to CSV to build a labelled dataset for offline eval pipelines. The CSV includes `score` and `score_note` columns.
 
-### Team management (Pro)
+### Dataset evals
 
-Invite team members with per-project roles: Owner, Editor, or Viewer. The instance admin creates accounts directly from the Team page (no email server needed). Each member sees only the projects they have access to.
+Create named test suites with inputs and expected outputs. Go to **Evals > Datasets**, add rows (input, optional expected output, optional row name), and click **Run** to batch-test against any model.
 
-- **Owner**: manage project members, delete project, plus all Editor permissions
-- **Editor**: create runs via proxy/SDK, score runs, add notes
-- **Viewer**: read-only access to dashboard, analytics, and runs
+Each row is auto-scored: exact match is checked first (case-insensitive, punctuation-trimmed), then an LLM judge is used as a fallback. Pass rates are tracked per dataset across all runs.
 
-New users are prompted to change their temporary password on first login.
+See [docs/datasets.md](docs/datasets.md) for a full walkthrough.
 
-See [docs/team-management.md](docs/team-management.md) for the full API reference.
+Community: 3 datasets, 10 rows each. Pro: unlimited.
+
+
+
+Attach arbitrary key-value metadata to any LLM call. Tags appear as color chips in the Runs table and are filterable.
+
+**Via the proxy header:**
+
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-tags: env=prod,team=backend,feature=summarizer" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Summarize this article..."}]}'
+```
+
+**Via the Python SDK:**
+
+```python
+import torrix
+import openai
+
+torrix.init(api_key="trxk_...", base_url="http://localhost:8088")
+client = torrix.wrap(openai.OpenAI(api_key="sk-..."))
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}],
+    extra_headers={"x-torrix-tags": "env=prod,team=backend"}
+)
+```
+
+Tags use a comma-separated `key=value` format. Any key or value is accepted. Use the tag filter on the Runs page to narrow runs by any tag key or value.
+
+### Prompt management and versioning
+
+Create named prompts with a system prompt and user template, publish versions, and test directly in the Playground.
+
+**Creating a prompt:**
+
+1. Go to **Prompts** in the sidebar.
+2. Click **New Prompt**.
+3. Enter a name, an optional description, and optionally a system prompt and user template.
+4. Click **Create**. If you entered prompt content, version 1 is created and set as active automatically.
+
+**Adding versions:**
+
+Click **Add version** on any prompt to save a new revision with updated content. Each version is numbered sequentially. Mark any version as active to make it the production version.
+
+**Testing in the Playground:**
+
+Use the **Load from Prompt Library** dropdown in the Playground to fill the system and user fields from the active version of any prompt. After editing, click **Save as prompt** to save your changes as a new version.
+
+**API:**
+
+```bash
+# List all prompts
+GET /api/prompts
+
+# Create a prompt
+POST /api/prompts
+{"name": "Support reply", "description": "Customer support tone"}
+
+# Add a version
+POST /api/prompts/:id/versions
+{"system_prompt": "You are a support agent.", "user_prompt_template": "Reply to: {{message}}"}
+
+# Set a version active
+PUT /api/prompts/:id/versions/:vid/activate
+
+# Get the active version
+GET /api/prompts/:id/active
+```
+
+---
+
+### Agent trace tree
+
+When multiple LLM calls share a trace ID, Torrix groups them on `/ui/traces/:traceId`. If parent-child span relationships are captured, the page renders a collapsible nested tree instead of a flat Gantt timeline.
+
+**Via OTLP (automatic):** Spans sent to `POST /v1/traces` are linked automatically using the standard `parentSpanId` field. No extra configuration needed.
+
+**Via the proxy:** Pass the parent run ID in a header:
+
+```bash
+# First call becomes the parent
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <openai-key>" \
+  -H "x-torrix-trace: my-trace-id" \
+  -H "x-torrix-name: Orchestrator" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Plan the task"}]}'
+
+# Second call is a child of the first (use the run ID from the dashboard or x-run-id response header)
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <openai-key>" \
+  -H "x-torrix-trace: my-trace-id" \
+  -H "x-torrix-parent-run-id: <parent-run-id>" \
+  -H "x-torrix-name: Tool: summarize" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Summarize this"}]}'
+```
+
+Open `/ui/traces/my-trace-id` to see the tree. Use the **Tree / Flat** toggle to switch views. Traces with no parent data fall back to the flat timeline automatically.
+
+### MCP server
+
+Torrix includes a built-in MCP server so any MCP-compatible AI assistant can query your observability data directly.
+
+**Available tools**
+
+| Tool | What it returns |
+|---|---|
+| `get_dashboard` | Aggregated stats: total cost, tokens, run count, error count, latency percentiles, top models |
+| `list_runs` | Recent runs with optional filters for model, provider, and HTTP status |
+| `get_run` | Full detail for one run including the prompt and response text |
+| `get_trace` | All steps in an agent trace with per-step cost and latency |
+| `get_session` | All turns in a conversation session with a combined cost total |
+| `compare_runs` | Side-by-side comparison of two runs: model, cost, latency, prompt, both responses |
+
+**Setup for Claude Desktop, Cursor, or Windsurf**
+
+Add this to your MCP configuration file:
+
+```json
+{
+  "mcpServers": {
+    "torrix": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:8088/mcp"],
+      "env": {
+        "MCP_HEADER_AUTHORIZATION": "Bearer YOUR_TORRIX_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Replace `YOUR_TORRIX_API_KEY` with a key from Settings. Restart your AI client after saving.
+
+**MCP server observability**
+
+Every MCP tool call is logged as a run in Torrix. Open the Runs table and filter by source **mcp** to see which tools your AI assistant called, how long each took, and whether it succeeded. The run detail panel shows the full tool arguments in the Event Timeline.
 
 ---
 
@@ -578,11 +774,11 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Feature | Community | Pro | Enterprise |
 |---|---|---|---|
 | Users | 1 | Up to 10 | Unlimited |
-| Team management (RBAC) | No | ✓ | ✓ |
 | Data retention | 7 days | 30 days | 90 days |
 | Runs shown | 100 most recent | Unlimited | Unlimited |
 | Budget alerts | ✓ | ✓ | ✓ |
 | Evals & regression testing | ✓ | ✓ | ✓ |
+| Dataset evals | 3 datasets, 10 rows | Unlimited | Unlimited |
 | Model cost comparison | ✓ | ✓ | ✓ |
 | Scheduled cost reports | No | ✓ | ✓ |
 | Model routing rules | No | ✓ | ✓ |

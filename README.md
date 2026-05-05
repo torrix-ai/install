@@ -448,6 +448,32 @@ The header accepts either the project name or its UUID. If no project with that 
 
 Switch the active project from any page (Home, Analytics, Runs, Evals) to scope all displayed data to that project. Selecting "All projects" restores the aggregate view across all projects.
 
+### Multimodal trace support
+
+Image content sent through the proxy is automatically captured in run traces. URL images appear as inline thumbnails in the run detail panel. Base64 images show as compact size badges with the MIME type and approximate byte size.
+
+Send image content using the standard provider format:
+
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "Describe this image."},
+        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
+      ]
+    }]
+  }'
+```
+
+No extra headers or configuration are needed. Torrix detects multimodal content blocks in OpenAI, Anthropic, and Gemini request formats and renders them in the run detail panel automatically.
+
 ### Tool call tracing
 
 Every tool call made by an agent is automatically captured as a separate event in the run trace. Works with OpenAI function calling, Anthropic tool use, and Gemini function calling. Open any run detail page and the Event Timeline shows each tool that fired, with its name and arguments.
@@ -522,6 +548,18 @@ See [docs/otel.md](docs/otel.md) for the full attribute mapping table and a Pyth
 ### Cost forecasting
 
 The home dashboard shows a projected month-end spend figure beneath the budget status bar. Torrix calculates your average daily cost from the current month's runs and extrapolates it to the end of the month. The forecast is color-coded: green when on track, amber when approaching your budget, and red when the projection exceeds it. No extra configuration is needed beyond setting a budget in Settings.
+
+### Per-project and per-key budget limits
+
+In addition to the global daily cap, you can set a daily spending limit scoped to an individual project or API key. Go to **Settings > Budget and Sampling** and use the Per-project and Per-key Limits card to add a cap. Select a project or API key from the dropdown, enter the daily limit in USD, then click Add.
+
+When a proxy request arrives with `x-torrix-project: <name>` and that project has already reached its daily cap, Torrix returns a 429 before making the upstream call:
+
+```json
+{"error": "Project budget cap exceeded", "detail": "Daily cap of $0.50 reached for this project."}
+```
+
+Per-key limits work the same way using the API key that authenticates the request. The global hard cap and per-scope limits are checked independently, so whichever limit is reached first takes effect.
 
 ### Streaming instrumentation
 

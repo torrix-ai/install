@@ -511,6 +511,18 @@ When a rule matches:
 - The response includes an `x-torrix-routed-from` header showing the original model
 - The run detail page displays a "Routed from" badge for audit
 
+**Fallback model:** Each routing rule accepts an optional fallback model. If the primary model returns a 404 (model not found), 429 (rate limited), or any 5xx server error, the proxy automatically retries the request with the fallback model before returning to the caller. Runs that triggered the fallback are marked with an amber badge in the Runs table. No application code changes are needed.
+
+```bash
+# gpt-4o sent to nonexistent-model gets 404 and retried as gpt-3.5-turbo automatically
+curl http://localhost:8088/proxy \
+  -H "Authorization: Bearer <torrix-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <openai-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"nonexistent-model","messages":[{"role":"user","content":"hello"}]}'
+```
+
 Rules are managed via the Settings page (Pro only) or the REST API:
 - `GET /api/routing-rules`
 - `POST /api/routing-rules`

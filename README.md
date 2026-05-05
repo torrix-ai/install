@@ -514,7 +514,7 @@ When a rule matches:
 **Fallback model:** Each routing rule accepts an optional fallback model. If the primary model returns a 404 (model not found), 429 (rate limited), or any 5xx server error, the proxy automatically retries the request with the fallback model before returning to the caller. Runs that triggered the fallback are marked with an amber badge in the Runs table. No application code changes are needed.
 
 ```bash
-# gpt-4o sent to nonexistent-model gets 404 and retried as gpt-3.5-turbo automatically
+# gpt-4o → sent to nonexistent-model → 404 → retried as gpt-3.5-turbo automatically
 curl http://localhost:8088/proxy \
   -H "Authorization: Bearer <torrix-key>" \
   -H "x-target-url: https://api.openai.com/v1/chat/completions" \
@@ -715,6 +715,45 @@ curl -X POST http://localhost:8088/proxy \
 ```
 
 Open `/ui/traces/my-trace-id` to see the tree. Use the **Tree / Flat** toggle to switch views. Traces with no parent data fall back to the flat timeline automatically.
+
+### MCP server
+
+Torrix includes a built-in MCP server so any MCP-compatible AI assistant can query your observability data directly.
+
+**Available tools**
+
+| Tool | What it returns |
+|---|---|
+| `get_dashboard` | Aggregated stats: total cost, tokens, run count, error count, latency percentiles, top models |
+| `list_runs` | Recent runs with optional filters for model, provider, and HTTP status |
+| `get_run` | Full detail for one run including the prompt and response text |
+| `get_trace` | All steps in an agent trace with per-step cost and latency |
+| `get_session` | All turns in a conversation session with a combined cost total |
+| `compare_runs` | Side-by-side comparison of two runs: model, cost, latency, prompt, both responses |
+
+**Setup for Claude Desktop, Cursor, or Windsurf**
+
+Add this to your MCP configuration file:
+
+```json
+{
+  "mcpServers": {
+    "torrix": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:8088/mcp"],
+      "env": {
+        "MCP_HEADER_AUTHORIZATION": "Bearer YOUR_TORRIX_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Replace `YOUR_TORRIX_API_KEY` with a key from Settings. Restart your AI client after saving.
+
+**MCP server observability**
+
+Every MCP tool call is logged as a run in Torrix. Open the Runs table and filter by source **mcp** to see which tools your AI assistant called, how long each took, and whether it succeeded. The run detail panel shows the full tool arguments in the Event Timeline.
 
 ---
 

@@ -617,7 +617,7 @@ See [docs/datasets.md](docs/datasets.md) for a full walkthrough.
 
 Community: 3 datasets, 10 rows each. Pro: unlimited.
 
-
+### Custom run tags
 
 Attach arbitrary key-value metadata to any LLM call. Tags appear as color chips in the Runs table and are filterable.
 

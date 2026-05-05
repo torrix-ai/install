@@ -190,7 +190,29 @@ const response = await client.messages.create({
 console.log(response.content[0].text)
 ```
 
-### Option 3: HTTP Proxy (any language or tool)
+### Option 4: LangChain callback
+
+Use `TorrixCallbackHandler` to trace every LLM call made through a LangChain LLM or ChatModel.
+
+```bash
+pip install torrix langchain-core
+```
+
+```python
+import torrix
+from torrix.wrappers.langchain_callback import TorrixCallbackHandler
+from langchain_openai import ChatOpenAI
+
+torrix.init(api_key="<your-torrix-api-key>", base_url="http://localhost:8088")
+handler = TorrixCallbackHandler()
+
+llm = ChatOpenAI(model="gpt-4o-mini", callbacks=[handler])
+response = llm.invoke("What is the capital of France?")
+```
+
+Every invocation is logged to Torrix with model, token counts, latency, prompt, and response. Works with any LangChain LLM or ChatModel.
+
+### Option 5: HTTP Proxy (any language or tool)
 
 Route any HTTP request through Torrix. Works with Google Gemini, Azure OpenAI, Groq, Mistral, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
 
@@ -782,7 +804,7 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Model cost comparison | ✓ | ✓ | ✓ |
 | Scheduled cost reports | No | ✓ | ✓ |
 | Model routing rules | No | ✓ | ✓ |
-| Prompt version control | No | Coming soon | Coming soon |
+| Prompt version control | ✓ | ✓ | ✓ |
 | Prompt playground | 10 runs free | Unlimited | Unlimited |
 | SSO (SAML / Okta) | No | No | Coming soon |
 | PII detection & masking | No | No | Coming soon |

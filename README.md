@@ -623,9 +623,11 @@ Rate any run good or bad manually with a thumbs up or down, or let an AI judge e
 - Token and latency efficiency: whether usage is proportionate to the task complexity
 - Reasoning depth (for runs with chain-of-thought): whether the thinking effort matches the task
 
-Select a provider (OpenAI-compatible or Anthropic), paste your API key, optionally set a custom model or base URL, and click **Auto-score**. Your API key goes directly to the provider and is never stored in Torrix.
+Select a provider (OpenAI-compatible or Anthropic), paste your API key, optionally set a custom model or base URL, and click **Auto-score**. Configure your judge provider and API key once in **Settings > AI Judge** and Torrix stores it securely for all evaluations. In the run detail panel, use **Use Judge LLM** to score with the saved key, or switch to **Manual** to enter credentials inline for a one-off evaluation.
 
 **Batch scoring:** On the Runs page, use the **Batch auto-score** panel to score multiple runs at once with one click. Saves your judge settings across sessions.
+
+**Online Evals (Pro):** Enable per project in **Settings > Online Evals** to automatically score every incoming production run as it arrives. The AI judge runs in the background after each new run is logged. Judge eval costs are tracked separately under **Analytics** and do not affect your production LLM spend figures.
 
 **Filtering and export:** Use the Score filter on the Runs page to show only good, bad, or unscored runs. Export to CSV to build a labelled dataset for offline eval pipelines. The CSV includes `score` and `score_note` columns.
 

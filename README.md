@@ -53,7 +53,7 @@ curl http://localhost:8088/health
 
 Expected response:
 ```json
-{"ok":true,"name":"Torrix","version":"0.1.0"}
+{"ok":true,"name":"Torrix","version":"2.0.0"}
 ```
 
 Check runs are being logged (requires your API key from Settings):
@@ -914,7 +914,7 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Prompt version control | ✓ | ✓ | ✓ |
 | Prompt playground | 10 runs free | Unlimited | Unlimited |
 | SSO (SAML / Okta) | No | No | Coming soon |
-| PII detection & masking | No | No | Coming soon |
+| PII detection & masking | ✓ | ✓ | ✓ |
 | Audit log export | No | No | Coming soon |
 | Helm chart (Kubernetes) | No | No | Coming soon |
 | Support | Community | Priority | Dedicated |

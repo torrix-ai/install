@@ -589,6 +589,8 @@ Set a soft alert threshold and a hard cap from Settings.
 
 **Hard cap:** When set, the proxy returns `429 Too Many Requests` as soon as the daily spend exceeds the cap. No further LLM calls are made until midnight. Prevents runaway agent loops from generating unexpected overnight costs.
 
+**Cost anomaly detection:** Torrix compares each run's cost against the p95 baseline for that model over the last 30 days. If a run exceeds the spike multiplier (default 3x) it is badged as a spike in the runs list and optionally fires a webhook with `event: cost_anomaly`. Requires at least 10 prior runs for the model. Configure in Settings > Alerts.
+
 ```bash
 # This request will be blocked with 429 if your hard cap is set and daily spend exceeded
 curl -X POST http://localhost:8088/proxy \

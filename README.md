@@ -483,6 +483,24 @@ Works with `opentelemetry-instrumentation-openai` (Python), Spring AI OTel (Java
 
 See [docs/otel.md](docs/otel.md) for full setup examples.
 
+---
+
+### Option 10: MCP Tool Proxy
+
+Route any HTTP MCP client through Torrix to log every `tools/call` invocation with the tool name, arguments, result, latency, and status. Handshake messages (`initialize`, `tools/list`, `ping`) are forwarded silently without logging.
+
+```bash
+curl -X POST http://localhost:8088/mcp-proxy \
+  -H "Authorization: Bearer trxk_your_key_here" \
+  -H "x-target-mcp-url: https://your-mcp-server.com/mcp" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search","arguments":{"query":"hello"}}}'
+```
+
+Pass `x-torrix-trace` to link tool calls to a parent LLM run in the trace view.
+
+See [docs/mcp-proxy.md](docs/mcp-proxy.md) for Claude Desktop, Cursor, and Python agent setup examples.
+
 **Setup:**
 1. Install the Torrix extension from the Chrome Web Store (coming soon)
 2. Open the extension popup and click the settings icon

@@ -190,7 +190,99 @@ const response = await client.messages.create({
 console.log(response.content[0].text)
 ```
 
-### Option 4: LangChain callback
+### Option 3: Go SDK
+
+```bash
+go get torrix.io/sdk/go
+```
+
+```go
+package main
+
+import (
+    "context"
+    "os"
+
+    torrix "torrix.io/sdk/go"
+    openai "github.com/sashabaranov/go-openai"
+)
+
+func ptr[T any](v T) *T { return &v }
+
+func main() {
+    torrix.Init(os.Getenv("TORRIX_API_KEY"),
+        torrix.WithBaseURL("http://localhost:8088"),
+    )
+
+    client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+    userMsg := "What is the capital of France?"
+
+    var resp openai.ChatCompletionResponse
+    latency, err := torrix.Measure(func() error {
+        var e error
+        resp, e = client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+            Model:    openai.GPT4oMini,
+            Messages: []openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleUser, Content: userMsg}},
+        })
+        return e
+    })
+    if err != nil {
+        panic(err)
+    }
+
+    reply := resp.Choices[0].Message.Content
+
+    torrix.Ingest(torrix.IngestPayload{
+        Model:        &resp.Model,
+        InputTokens:  ptr(int(resp.Usage.PromptTokens)),
+        OutputTokens: ptr(int(resp.Usage.CompletionTokens)),
+        LatencyMs:    ptr(latency.Milliseconds()),
+        Status:       ptr(200),
+        Prompt:       &userMsg,
+        Response:     &reply,
+    })
+}
+```
+
+See [docs/go-sdk.md](docs/go-sdk.md) for the full reference.
+
+### Option 4: C# / .NET SDK
+
+```bash
+dotnet add package Torrix
+```
+
+```csharp
+using TorrixAI;
+
+Torrix.Init("<your-torrix-api-key>", new TorrixOptions
+{
+    BaseUrl = "http://localhost:8088"
+});
+
+var chatClient = new ChatClient("gpt-4o-mini", "<your-openai-key>");
+var userMessage = "What is the capital of France?";
+
+var (response, latencyMs) = await Torrix.MeasureAsync(async () =>
+    await chatClient.CompleteChatAsync(userMessage));
+
+Torrix.Ingest(new IngestPayload
+{
+    Model        = "gpt-4o-mini",
+    Provider     = "openai",
+    LatencyMs    = latencyMs,
+    InputTokens  = response.Value.Usage.InputTokenCount,
+    OutputTokens = response.Value.Usage.OutputTokenCount,
+    Prompt       = userMessage,
+    Response     = response.Value.Content[0].Text,
+});
+```
+
+Targets .NET 6 and above. Zero external dependencies. Works with OpenAI, Azure OpenAI, and SAP AI Core.
+
+See [docs/csharp-sdk.md](docs/csharp-sdk.md) for Azure OpenAI, SAP AI Core examples, and the full API reference.
+
+### Option 5: LangChain callback
 
 Use `TorrixCallbackHandler` to trace every LLM call made through a LangChain LLM or ChatModel.
 
@@ -212,7 +304,7 @@ response = llm.invoke("What is the capital of France?")
 
 Every invocation is logged to Torrix with model, token counts, latency, prompt, and response. Works with any LangChain LLM or ChatModel.
 
-### Option 5: HTTP Proxy (any language or tool)
+### Option 6: HTTP Proxy (any language or tool)
 
 Route any HTTP request through Torrix. Works with Google Gemini, Azure OpenAI, Groq, Mistral, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
 
@@ -332,9 +424,22 @@ Or import the ready-to-use workflow template:
 2. In n8n, go to **Workflows → Import from file**
 3. Follow the setup notes inside the workflow
 
+### Option 7: Browser Extension
+
+The Torrix Chrome extension captures conversations from AI chat platforms without any code changes or API key rerouting.
+
+**Supported platforms:** ChatGPT, Claude, Gemini, Perplexity, Grok, Microsoft Copilot, Mistral
+
+**Setup:**
+1. Install the Torrix extension from the Chrome Web Store (coming soon)
+2. Open the extension popup and click the settings icon
+3. Enter your Torrix server URL (default: `http://localhost:8088`) and API key
+4. Use any supported AI platform normally. Every conversation is captured automatically.
+
+All captured data goes directly to your Torrix instance. Nothing is sent to Torrix or to any third party.
+
 ---
 
-## Features
 
 ### Agent trace grouping
 
@@ -799,7 +904,7 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 |---|---|---|---|
 | Users | 1 | Up to 10 | Unlimited |
 | Data retention | 7 days | 30 days | 90 days |
-| Runs shown | 100 most recent | Unlimited | Unlimited |
+| Runs shown | 10,000 most recent | Unlimited | Unlimited |
 | Budget alerts | ✓ | ✓ | ✓ |
 | Evals & regression testing | ✓ | ✓ | ✓ |
 | Dataset evals | 3 datasets, 10 rows | Unlimited | Unlimited |

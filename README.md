@@ -193,7 +193,7 @@ console.log(response.content[0].text)
 ### Option 3: Go SDK
 
 ```bash
-go get torrix.io/sdk/go
+go get torrix.ai/sdk/go
 ```
 
 ```go
@@ -203,7 +203,7 @@ import (
     "context"
     "os"
 
-    torrix "torrix.io/sdk/go"
+    torrix "torrix.ai/sdk/go"
     openai "github.com/sashabaranov/go-openai"
 )
 

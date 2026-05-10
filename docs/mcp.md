@@ -117,4 +117,4 @@ Once connected, ask your AI assistant things like:
 
 ## Community edition limits
 
-The MCP server returns up to 100 runs from the last 7 days on Community edition. Pro returns the full 30-day history.
+The MCP server returns up to 100 runs per query (adjustable via the `limit` parameter). Community edition stores runs for 7 days; Pro stores 30 days.

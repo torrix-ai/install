@@ -282,7 +282,43 @@ Targets .NET 6 and above. Zero external dependencies. Works with OpenAI, Azure O
 
 See [docs/csharp-sdk.md](docs/csharp-sdk.md) for Azure OpenAI, SAP AI Core examples, and the full API reference.
 
-### Option 5: LangChain callback
+### Option 5: Java SDK
+
+**Maven:**
+```xml
+<dependency>
+  <groupId>ai.torrix</groupId>
+  <artifactId>torrix</artifactId>
+  <version>0.2.0</version>
+</dependency>
+```
+
+**Gradle:** `implementation 'ai.torrix:torrix:0.2.0'`
+
+```java
+import ai.torrix.*;
+
+Torrix.init(System.getenv("TORRIX_API_KEY"),
+    "http://localhost:8088");
+
+long start = System.currentTimeMillis();
+// ... your LLM call ...
+long latencyMs = System.currentTimeMillis() - start;
+
+Torrix.ingest(IngestPayload.builder()
+    .model("gpt-4o-mini")
+    .provider("openai")
+    .latencyMs(latencyMs)
+    .inputTokens(usage.getPromptTokens())
+    .outputTokens(usage.getCompletionTokens())
+    .build());
+```
+
+Java 11+. Zero external dependencies. Works with Spring AI, LangChain4j, OpenAI Java SDK, and any Java HTTP client.
+
+See [docs/java-sdk.md](docs/java-sdk.md) for the full reference.
+
+### Option 6: LangChain callback
 
 Use `TorrixCallbackHandler` to trace every LLM call made through a LangChain LLM or ChatModel.
 
@@ -304,7 +340,7 @@ response = llm.invoke("What is the capital of France?")
 
 Every invocation is logged to Torrix with model, token counts, latency, prompt, and response. Works with any LangChain LLM or ChatModel.
 
-### Option 6: HTTP Proxy (any language or tool)
+### Option 7: HTTP Proxy (any language or tool)
 
 Route any HTTP request through Torrix. Works with Google Gemini, Azure OpenAI, Groq, Mistral, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, SAP AI Core, GitHub Copilot, n8n, Make, curl, and any OpenAI-compatible API.
 
@@ -424,7 +460,7 @@ Or import the ready-to-use workflow template:
 2. In n8n, go to **Workflows → Import from file**
 3. Follow the setup notes inside the workflow
 
-### Option 7: Browser Extension
+### Option 8: Browser Extension
 
 The Torrix Chrome extension captures conversations from AI chat platforms without any code changes or API key rerouting.
 

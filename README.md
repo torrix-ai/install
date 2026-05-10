@@ -466,6 +466,23 @@ The Torrix Chrome extension captures conversations from AI chat platforms withou
 
 **Supported platforms:** ChatGPT, Claude, Gemini, Perplexity, Grok, Microsoft Copilot, Mistral
 
+---
+
+### Option 9: OpenTelemetry (zero-SDK)
+
+Point any OpenTelemetry GenAI instrumentation library at Torrix. No Torrix SDK needed.
+
+Set your OTLP exporter endpoint to `http://localhost:8088/v1/traces` and pass your Torrix API key via `Authorization: Bearer trxk_...`.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:8088
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer trxk_your_key_here"
+```
+
+Works with `opentelemetry-instrumentation-openai` (Python), Spring AI OTel (Java), `@arizeai/openinference-instrumentation-openai` (Node.js), and any library that emits `gen_ai.*` span attributes.
+
+See [docs/otel.md](docs/otel.md) for full setup examples.
+
 **Setup:**
 1. Install the Torrix extension from the Chrome Web Store (coming soon)
 2. Open the extension popup and click the settings icon

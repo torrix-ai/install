@@ -578,6 +578,8 @@ Every API call is logged with token counts, model, cost, and latency. See exactl
 ### Regression testing (Evals)
 Mark any run as a golden baseline. Replay it against the LLM with one click and compare outputs side-by-side. Catch regressions when switching models or changing prompts.
 
+Use the checkbox on each row on the Evals page to select individual golden runs or all at once, then click **Export JSONL** to download an OpenAI-compatible fine-tuning file.
+
 ### Model cost comparison
 On any run detail page, see what the same request would have cost across 300+ models, live priced and sorted cheapest to most expensive.
 
@@ -705,6 +707,8 @@ The digest reuses your existing webhook URL from Budget Controls. Slack webhook 
 ### Model routing rules (Pro)
 
 Auto-rewrite the `model` field in proxy requests before they reach the upstream provider. Create rules in Settings like "swap `gpt-4o` to `gpt-4o-mini`" to optimize cost without changing any application code.
+
+Rules can also match on **prompt content** instead of model name. Set condition type to **Prompt contains keyword** or **Prompt matches regex** in Settings. For example, a rule that matches `translate` in the prompt and routes to `gpt-4o-mini` will only apply when the user message contains that word.
 
 When a rule matches:
 - The request is forwarded with the rewritten model name
@@ -871,6 +875,10 @@ Click **Add version** on any prompt to save a new revision with updated content.
 **Testing in the Playground:**
 
 Use the **Load from Prompt Library** dropdown in the Playground to fill the system and user fields from the active version of any prompt. After editing, click **Save as prompt** to save your changes as a new version.
+
+**Compare models:**
+
+Switch to Compare mode in the Playground to run the same prompt against two different provider and model combinations in parallel. Both responses stream independently. When both finish, a summary line shows which model was faster and which was cheaper.
 
 **API:**
 

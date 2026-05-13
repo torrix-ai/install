@@ -363,6 +363,7 @@ curl -X POST http://localhost:8088/proxy \
 | `x-torrix-provider` | Optional provider hint: `openai`, `anthropic`, `google` |
 | `x-torrix-trace` | Optional trace ID to group multiple calls into one agent run |
 | `x-torrix-session` | Optional session ID to group a multi-turn conversation |
+| `x-torrix-user-id` | Optional end-user identifier. Appears in Analytics under By User. |
 
 **Google Gemini** (uses `?key=` instead of Bearer token):
 ```python
@@ -435,6 +436,30 @@ curl -X POST http://localhost:8088/proxy \
 ```
 
 No API key needed for Ollama. Omit `x-upstream-authorization`. Use `host.docker.internal` instead of `localhost` when running Torrix in Docker on Mac or Windows. On Linux, use your machine's actual IP address (e.g. `172.17.0.1`) instead.
+
+### Per-user cost tracking
+
+Attribute runs to your end-users by passing a user identifier on each request.
+
+**Via the proxy header:**
+
+```bash
+curl -X POST http://localhost:8088/proxy \
+  -H "Authorization: Bearer <your-torrix-api-key>" \
+  -H "x-target-url: https://api.openai.com/v1/chat/completions" \
+  -H "x-upstream-authorization: Bearer <your-openai-key>" \
+  -H "x-torrix-user-id: alice" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+**Via the Python SDK ingest:**
+
+```python
+torrix.ingest(model="gpt-4o-mini", ..., user_id="alice")
+```
+
+The Analytics page shows a **By User** table with per-user request counts, token totals, and cost breakdown.
 
 **n8n workflow:** Use the HTTP Request node pointed at `http://host.docker.internal:8088/proxy` with these headers:
 
@@ -812,6 +837,16 @@ Select a provider (OpenAI-compatible or Anthropic), paste your API key, optional
 **Online Evals (Pro):** Enable per project in **Settings > Online Evals** to automatically score every incoming production run as it arrives. The AI judge runs in the background after each new run is logged. Judge eval costs are tracked separately under **Analytics** and do not affect your production LLM spend figures.
 
 **Filtering and export:** Use the Score filter on the Runs page to show only good, bad, or unscored runs. Export to CSV to build a labelled dataset for offline eval pipelines. The CSV includes `score` and `score_note` columns.
+
+### Shareable run links
+
+Share any run trace with a teammate or in a bug report without requiring a Torrix account.
+
+1. Open any run in the run detail panel.
+2. Click **Share** in the panel header.
+3. The public URL is copied to your clipboard.
+
+Anyone with the link can view the model, provider, cost, latency, token counts, prompt, and response. The link can be revoked at any time: click **Revoke** in the panel header to unshare the run.
 
 ### Dataset evals
 

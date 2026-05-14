@@ -2,6 +2,8 @@
 
 Track every LLM request: tokens, cost, latency, full prompt traces, reasoning token capture, and PII masking. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
 
+**Try the live demo at [demo.torrix.ai](https://demo.torrix.ai). No signup needed. Data is read-only and pre-loaded with sample runs.**
+
 ---
 
 ## Getting Started

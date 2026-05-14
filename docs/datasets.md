@@ -33,6 +33,30 @@ To edit an existing row, click the pencil icon on the right of any row.
 
 Community edition: up to 10 rows per dataset. Pro: unlimited.
 
+## Importing rows from a CSV file
+
+To bulk-add rows, click **Import CSV** next to the **+ Add Row** button inside the expanded dataset panel.
+
+**CSV format requirements:**
+
+- The first row must be a header row.
+- The column named `input` is required. Columns named `expected` and `name` are optional.
+- Column order does not matter. Any columns not named `input`, `expected`, or `name` are ignored.
+- Values containing commas must be wrapped in double quotes.
+
+**Example:**
+
+```csv
+input,expected,name
+What is the capital of France?,Paris,France capital
+What is 2 + 2?,4,Basic arithmetic
+Translate "hello" to Spanish.,hola,Translation
+```
+
+After selecting the file, Torrix parses it client-side and sends all rows to the server in a single batch. A confirmation message shows how many rows were added (for example, "Added 47 rows").
+
+There is no row limit during import other than the per-dataset row limit for your edition.
+
 ## Running a dataset
 
 1. Click **Run** next to the dataset name.

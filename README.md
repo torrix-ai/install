@@ -938,9 +938,17 @@ GET /api/prompts/:id/active
 
 ---
 
-### Agent trace tree
+### SQL query interface
 
-When multiple LLM calls share a trace ID, Torrix groups them on `/ui/traces/:traceId`. If parent-child span relationships are captured, the page renders a collapsible nested tree instead of a flat Gantt timeline.
+Run any `SELECT` statement directly against your Torrix database from the browser. Click **Query** in the sidebar to open the query editor.
+
+A schema reference panel lists all available tables and columns. Press **Ctrl+Enter** (or **Cmd+Enter** on Mac) to run a query. Results render as a table with row count and execution time, and can be exported as CSV.
+
+Only `SELECT` statements are allowed. `DROP`, `DELETE`, `UPDATE`, `INSERT`, `ALTER`, and `CREATE` are blocked. Results are capped at 500 rows.
+
+See [docs/sql-query.md](docs/sql-query.md) for example queries and the full table reference.
+
+### Agent trace tree If parent-child span relationships are captured, the page renders a collapsible nested tree instead of a flat Gantt timeline.
 
 **Via OTLP (automatic):** Spans sent to `POST /v1/traces` are linked automatically using the standard `parentSpanId` field. No extra configuration needed.
 

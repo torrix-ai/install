@@ -648,9 +648,37 @@ The value is a float between 0 and 1. `0.1` logs roughly 10% of requests. `1` lo
 
 Set a default rate for all requests at the instance level from Settings. When set, every request that does not include an `x-torrix-sample` header is sampled at the configured rate. Per-request headers always override the global setting.
 
-### Structured JSON export
+### Prompt compression
 
-Export your full run history from the Runs page. Two formats are available:
+Reduce token usage before each request is forwarded to the model. Enable per project in **Settings > Compression**.
+
+**Levels:**
+
+| Level | What it does |
+|---|---|
+| Off | No modification. Default. |
+| Conservative | Strips redundant whitespace, removes duplicate sentences, and removes filler sentences (greetings, sycophantic openers, sign-off closers). |
+| Balanced | Everything in Conservative, plus truncates long conversation histories over 20 messages, keeping the system prompt, the first 2 turns, and the last 8 turns. |
+
+Token savings are tracked per run and visible on the run detail page (Original vs Compressed toggle) and in Analytics (Tokens Saved card).
+
+**Custom ignore words and phrases**
+
+Each project accepts a custom list of words or phrases to strip, one per line. Single words extend the built-in filler vocabulary. Multi-word phrases are matched as exact sentences.
+
+Examples:
+```
+cheers
+regards
+merci
+hope this finds you well
+as per our conversation
+circling back
+```
+
+All matching is case-insensitive and punctuation-insensitive. Phrases must match a complete sentence boundary to be stripped. The last remaining sentence in a message is always preserved, regardless of the ignore list.
+
+### Structured JSON export Two formats are available:
 
 - **CSV**: comma-separated with all fields, compatible with spreadsheets and most analytics tools
 - **JSON**: full-fidelity export including model, provider, input and output tokens, cost, latency, prompt body, response text, finish reason, trace ID, session ID, and project

@@ -1,6 +1,6 @@
 # Torrix: AI Observability
 
-Track every LLM request: tokens, cost, latency, full prompt traces, reasoning token capture, and PII masking. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
+Track every LLM request: tokens, cost, latency, full prompt traces, reasoning token capture, PII masking, and AI governance policies. Works with OpenAI, Anthropic, Google Gemini, Groq, Mistral, Azure OpenAI, DeepSeek, Perplexity, Fireworks, Together AI, Cohere, HuggingFace, Replicate, Ollama, and any HTTP endpoint. Self-hosted, no data leaves your machine.
 
 **Try the live demo at [demo.torrix.ai](https://demo.torrix.ai). No signup needed. Data is read-only and pre-loaded with sample runs.**
 
@@ -55,7 +55,7 @@ curl http://localhost:8088/health
 
 Expected response:
 ```json
-{"ok":true,"name":"Torrix","version":"2.0.0"}
+{"ok":true,"name":"Torrix","version":"2.9.0"}
 ```
 
 Check runs are being logged (requires your API key from Settings):
@@ -1050,6 +1050,38 @@ Every MCP tool call is logged as a run in Torrix. Open the Runs table and filter
 
 ---
 
+### AI governance policies (Pro)
+
+Define rules that block or flag AI calls before they reach the model. Go to **Settings** and open the **Governance** tab.
+
+| Condition type | What it checks |
+|---|---|
+| Model not in approved list | Blocks any call using a model outside your approved set |
+| Prompt contains text | Matches a keyword in the prompt (case-insensitive) |
+| Prompt matches regex | Matches a regular expression in the prompt |
+| Cost above threshold | Flags requests whose estimated cost exceeds a USD value |
+
+Actions:
+
+- **Block** — the proxy returns HTTP 403 with the policy name. The request never reaches the model.
+- **Flag** — the request proceeds but the run is tagged with the policy name for review.
+
+See [docs/governance.md](docs/governance.md) for the full reference including the REST API.
+
+---
+
+### Compliance report export (Pro)
+
+Download a dated CSV covering all AI activity and audit log events for any date range. Go to `/ui/compliance`, set the date range and optional project filter, click **Load Summary** to preview counts, then **Download CSV**.
+
+The report has two sections: an AI activity log (model, cost, tokens, status, anomaly flag, governance flag per call) and a full audit log (every settings change and admin action with timestamp, IP, and user email).
+
+Suitable for SOC 2, GDPR Art. 30, and EU AI Act audit documentation.
+
+See [docs/governance.md](docs/governance.md) for the API endpoints and compliance framework mapping.
+
+---
+
 ## Editions
 
 Community is free forever. Pro is live at founding-member pricing. Enterprise is coming soon.
@@ -1069,6 +1101,8 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Prompt playground | 10 runs free | Unlimited | Unlimited |
 | SSO (SAML / Okta) | No | No | Coming soon |
 | PII detection & masking | ✓ | ✓ | ✓ |
+| AI governance policies | No | ✓ | ✓ |
+| Compliance report export | No | ✓ | ✓ |
 | Audit log export | No | No | Coming soon |
 | Helm chart (Kubernetes) | No | No | Coming soon |
 | Support | Community | Priority | Dedicated |

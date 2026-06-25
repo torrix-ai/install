@@ -286,3 +286,35 @@ The Runs page organises its filters into two tiers.
 **Collapsed by default (click Filters to expand):** Agent, Source, Latency, Score, Traces only, Sessions only, Long prompts, Optimize?, Repeated
 
 When one or more advanced filters are active, a count badge appears on the Filters button so you can see at a glance how many constraints are applied. The advanced row auto-expands when you arrive on the page with a filter already set from a link or bookmark.
+
+---
+
+## AI governance policies
+
+Define rules that block or flag AI calls before they reach the model. Go to **Settings** and open the **Governance** tab.
+
+Condition types:
+
+- **Model not in approved list** - block or flag calls using a model outside your approved set
+- **Prompt contains** - match a keyword in the prompt text (case-insensitive)
+- **Prompt regex** - match a regular expression in the prompt text
+- **Cost above threshold** - flag requests whose estimated cost exceeds a USD value
+
+Actions:
+
+- **Block** - the proxy returns HTTP 403. The request never reaches the model.
+- **Flag** - the request proceeds but the run is tagged with the policy name for review.
+
+See [governance.md](governance.md) for the full reference including the REST API.
+
+---
+
+## Compliance report export
+
+Download a dated CSV covering all AI activity and audit log events for any date range. Go to `/ui/compliance`, set the date range, click **Load Summary** to preview, then **Download CSV**.
+
+The report has two sections: an AI activity log (model, cost, tokens, status, anomaly flag, governance flag per call) and a full audit log (every settings change and admin action with timestamp, IP, and user email).
+
+Suitable for SOC 2, GDPR Art. 30, and EU AI Act audit documentation.
+
+See [governance.md](governance.md) for the API and compliance framework mapping.

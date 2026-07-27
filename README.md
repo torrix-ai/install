@@ -55,7 +55,7 @@ curl http://localhost:8088/health
 
 Expected response:
 ```json
-{"ok":true,"name":"Torrix","version":"3.1.0"}
+{"ok":true,"name":"Torrix","version":"3.3.0"}
 ```
 
 Check runs are being logged (requires your API key from Settings):
@@ -1110,6 +1110,54 @@ Users who sign in via SSO for the first time are provisioned automatically. If a
 | Auth0 | `https://your-tenant.auth0.com` |
 
 See [docs/governance.md](docs/governance.md) for the REST API to configure SSO programmatically.
+
+---
+
+### SLM Opportunities
+
+Torrix analyses your run history and scores each repeated prompt pattern against 7 signals to identify tasks a fine-tuned small model could handle at a fraction of the cost. Go to the **Analytics** page and click **Analyse runs** in the SLM Opportunities card.
+
+Scoring signals:
+
+| Signal | What it means |
+|---|---|
+| Repetition (5 or more times in 7 days) | Templated task, not creative |
+| Short input (under 200 tokens) | Simple structured prompt |
+| Structured output (JSON mode or tool calling) | Schema-constrained output |
+| Short output (under 150 tokens) | Formulaic response |
+| Zero errors | Consistent and well-defined task |
+| All runs passing (score = 1) | Quality already validated |
+| High cache hit rate | Deterministic enough for an SLM |
+
+Strong candidates (score 6 or above) show an estimated monthly savings figure and a one-click JSONL export.
+
+### SLM training data export
+
+Click **Export training data (JSONL)** in the SLM Opportunities card. Each line of the export is one training example:
+
+```json
+{"messages": [{"role": "system", "content": "Classify as: billing, technical, or account."}, {"role": "user", "content": "I was charged twice"}, {"role": "assistant", "content": "billing"}]}
+```
+
+The export includes the system prompt, user message, and assistant response. Only passing runs (`score = 1`) are included. Compatible with OpenAI fine-tuning, Mistral, Axolotl, Unsloth, and any standard fine-tuning pipeline.
+
+Enable [Online Evals](docs/governance.md) before exporting to ensure training data quality. If fewer than 50% of candidate runs have quality scores, the card shows an amber warning.
+
+### SLM routing and quality gate
+
+After fine-tuning, deploy your SLM on any OpenAI-compatible server (Ollama, vLLM, llama.cpp) and add a routing rule in **Settings > Routing**:
+
+1. Set **From model** to the original model (e.g. `gpt-4o`)
+2. Set **To model** to your SLM name (e.g. `my-classifier`)
+3. Expand **Advanced: SLM endpoint routing**
+4. Enter the **SLM endpoint URL** (e.g. `http://localhost:11434/v1`)
+5. Optionally set a **Quality threshold** (e.g. `0.8`)
+
+Torrix redirects matching calls to your SLM with no code change in your application. If the quality threshold is set and the average score of recent routed runs drops below it, Torrix automatically disables the routing rule and fires a webhook alert.
+
+The **SLM Performance** card on the Analytics page shows actual SLM cost vs estimated LLM cost per routing rule, total savings, and average quality score since the rule was created.
+
+See [docs/slm.md](docs/slm.md) for the full reference.
 
 ---
 

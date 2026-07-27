@@ -139,3 +139,57 @@ Returns:
 | EU AI Act (transparency and logging) | Every high-risk AI call is logged with model, inputs, outputs, and cost |
 | SOC 2 Type II (change management, access) | Audit log captures all settings changes, key lifecycle events, and user actions |
 | HIPAA (audit controls) | PII masking removes PHI before storage; audit log records every access event |
+
+---
+
+## SSO configuration via API
+
+### Get current SSO config
+
+```http
+GET /api/sso/config
+Authorization: Bearer <your-torrix-api-key>
+```
+
+Returns:
+
+```json
+{
+  "issuer": "https://accounts.google.com",
+  "client_id": "your-client-id",
+  "configured": true
+}
+```
+
+### Save SSO config
+
+```http
+POST /api/sso/config
+Authorization: Bearer <your-torrix-api-key>
+Content-Type: application/json
+
+{
+  "issuer": "https://accounts.google.com",
+  "client_id": "your-client-id",
+  "client_secret": "your-client-secret"
+}
+```
+
+Admin access required. The client secret is stored server-side and never returned in GET responses.
+
+### Remove SSO config
+
+```http
+DELETE /api/sso/config
+Authorization: Bearer <your-torrix-api-key>
+```
+
+Removes all SSO configuration. Users will no longer see the Sign in with SSO button.
+
+### Check SSO status (unauthenticated)
+
+```http
+GET /auth/sso/status
+```
+
+Returns `{ "configured": true, "issuer": "https://accounts.google.com" }`. Used by the login page to decide whether to show the SSO button. Safe to call without authentication.

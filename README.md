@@ -55,7 +55,7 @@ curl http://localhost:8088/health
 
 Expected response:
 ```json
-{"ok":true,"name":"Torrix","version":"2.9.0"}
+{"ok":true,"name":"Torrix","version":"3.1.0"}
 ```
 
 Check runs are being logged (requires your API key from Settings):
@@ -1082,6 +1082,37 @@ See [docs/governance.md](docs/governance.md) for the API endpoints and complianc
 
 ---
 
+### OIDC Single Sign-On (Enterprise)
+
+Connect any OpenID Connect identity provider so your team signs in without a Torrix password. Supported providers include Okta, Azure AD, Google Workspace, Keycloak, and Auth0.
+
+Users who sign in via SSO for the first time are provisioned automatically. If a user with the same email already exists they are linked to their existing account.
+
+**Setup:**
+
+1. Create an OAuth 2.0 application in your identity provider with the following redirect URI:
+   ```
+   https://your-torrix-domain/auth/sso/callback
+   ```
+2. Copy the Issuer URL, Client ID, and Client Secret.
+3. In Torrix, go to **Settings** and open the **SSO** tab (Enterprise edition only).
+4. Enter the Issuer URL, Client ID, and Client Secret, then click **Save**.
+5. The **Sign in with SSO** button appears on the login page.
+
+**Issuer URLs by provider:**
+
+| Provider | Issuer URL |
+|---|---|
+| Google Workspace | `https://accounts.google.com` |
+| Okta | `https://your-org.okta.com` |
+| Azure AD | `https://login.microsoftonline.com/your-tenant-id/v2.0` |
+| Keycloak | `https://your-keycloak/realms/your-realm` |
+| Auth0 | `https://your-tenant.auth0.com` |
+
+See [docs/governance.md](docs/governance.md) for the REST API to configure SSO programmatically.
+
+---
+
 ## Editions
 
 Community is free forever. Pro is live at founding-member pricing. Enterprise is coming soon.
@@ -1099,7 +1130,7 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Model routing rules | No | ✓ | ✓ |
 | Prompt version control | ✓ | ✓ | ✓ |
 | Prompt playground | 10 runs free | Unlimited | Unlimited |
-| SSO (SAML / Okta) | No | No | Coming soon |
+| SSO (OIDC) | No | No | ✓ (Okta, Azure AD, Google Workspace, Keycloak) |
 | PII detection & masking | ✓ | ✓ | ✓ |
 | AI governance policies | No | ✓ | ✓ |
 | Compliance report export | No | ✓ | ✓ |

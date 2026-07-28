@@ -55,7 +55,7 @@ curl http://localhost:8088/health
 
 Expected response:
 ```json
-{"ok":true,"name":"Torrix","version":"3.3.0"}
+{"ok":true,"name":"Torrix","version":"3.3.1"}
 ```
 
 Check runs are being logged (requires your API key from Settings):

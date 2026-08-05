@@ -8,6 +8,14 @@ Track every LLM request: tokens, cost, latency, full prompt traces, reasoning to
 
 ## Getting Started
 
+**Option 1 — Deploy to Railway (no Docker needed)**
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template?template=https://github.com/torrix-ai/install&service[name]=torrix&service[source][image]=torrixai/torrix:latest&service[variables][DB_PATH]=/data/torrix.sqlite&service[variables][TORRIX_EDITION]=community&service[variables][PORT]=8088)
+
+One click. No local setup. Railway provisions a server, pulls the Docker image, and gives you a public URL.
+
+**Option 2 — Self-hosted with Docker**
+
 The only requirement is [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ### Mac

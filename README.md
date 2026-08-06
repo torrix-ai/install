@@ -8,35 +8,78 @@ Track every LLM request: tokens, cost, latency, full prompt traces, reasoning to
 
 ## Getting Started
 
+### Option A: Native app (no Docker required)
+
+Download and run a single file. No Docker, no Node.js, no setup.
+
+**Mac (Apple Silicon):**
+```bash
+curl -fsSL https://torrix.ai/install.sh | sh
+```
+
+**Mac (Intel), Linux, or Windows:** Download from [torrix.ai](https://torrix.ai) or the [latest release](https://github.com/torrix-ai/install/releases/latest).
+
+After install, Torrix starts automatically and opens your browser at [http://localhost:8088](http://localhost:8088). It registers as a background service that starts on login and restarts if it crashes.
+
+**To update:**
+```bash
+curl -fsSL https://torrix.ai/install.sh | sh
+```
+
+**To stop the background service:**
+```bash
+launchctl unload ~/Library/LaunchAgents/io.torrix.app.plist   # Mac
+systemctl --user stop torrix                                   # Linux
+```
+
+**To uninstall:**
+```bash
+launchctl unload ~/Library/LaunchAgents/io.torrix.app.plist 2>/dev/null; true
+rm -f ~/Library/LaunchAgents/io.torrix.app.plist
+rm -rf ~/Applications/Torrix.app
+rm -rf ~/.torrix
+```
+
+---
+
+### Option B: Docker
+
 The only requirement is [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-### Mac
-
-Open Terminal and run:
+**Mac / Linux:**
 
 ```bash
 curl -o docker-compose.yml https://raw.githubusercontent.com/torrix-ai/install/main/docker-compose.community.yml
 docker compose up
 ```
 
-> This downloads the community edition config and saves it as `docker-compose.yml` so Docker picks it up automatically.
-
-### Windows
-
-Open PowerShell and run:
+**Windows:**
 
 ```powershell
 curl.exe -o docker-compose.yml https://raw.githubusercontent.com/torrix-ai/install/main/docker-compose.community.yml
 docker compose up
 ```
 
-> This downloads the community edition config and saves it as `docker-compose.yml` so Docker picks it up automatically.
-
 Or download the file manually:
 1. Go to [github.com/torrix-ai/install](https://github.com/torrix-ai/install)
 2. Click `docker-compose.community.yml` then click **Raw**
 3. Save the file as `docker-compose.yml`
 4. Open a terminal in that folder and run `docker compose up`
+
+**To update Docker:**
+```bash
+docker compose pull
+docker compose up -d
+```
+
+**To stop Docker:**
+```bash
+docker compose down
+```
+
+Your data is preserved in the `./data/` folder and will be available when you start again.
+
+---
 
 ### After startup
 
@@ -55,7 +98,7 @@ curl http://localhost:8088/health
 
 Expected response:
 ```json
-{"ok":true,"name":"Torrix","version":"3.3.1"}
+{"ok":true,"name":"Torrix","version":"4.0.2"}
 ```
 
 Check runs are being logged (requires your API key from Settings):
@@ -1161,6 +1204,7 @@ See [docs/slm.md](docs/slm.md) for the full reference.
 
 ---
 
+
 ## Editions
 
 Community is free forever. Pro is live at founding-member pricing. Enterprise is coming soon.
@@ -1187,27 +1231,6 @@ Community is free forever. Pro is live at founding-member pricing. Enterprise is
 | Support | Community | Priority | Dedicated |
 
 Get Pro at [torrix.ai](https://torrix.ai)
-
----
-
-## Updating Torrix
-
-To pull the latest version:
-
-```bash
-docker compose pull
-docker compose up -d
-```
-
----
-
-## Stopping Torrix
-
-```bash
-docker compose down
-```
-
-Your data is preserved in the `./data/` folder and will be available when you start again.
 
 ---
 
@@ -1286,3 +1309,4 @@ Anonymous telemetry is enabled by default. It sends only your instance ID, OS, a
 ## Support
 
 For questions or feedback: [contact@torrix.ai](mailto:contact@torrix.ai)
+
